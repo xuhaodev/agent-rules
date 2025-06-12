@@ -17,3 +17,14 @@ A comprehensive rule for creating well-structured GitHub issues from feature des
 **Usage**: Add the content from `github-issue-creation.md` to your global or project-specific CLAUDE.md file.
 
 **Location**: [`github-issue-creation.md`](./github-issue-creation.md)
+
+## LLM Documentation
+
+The `llms/` directory contains reference documentation for working with Large Language Models, particularly focused on Swift development:
+
+- **[swift-observable.md](./llms/swift-observable.md)** - Documentation for Swift's @Observable macro and observation framework
+- **[swift-observation.md](./llms/swift-observation.md)** - Swift Observation framework details and patterns
+- **[swift-testing-api.md](./llms/swift-testing-api.md)** - Swift Testing framework API reference
+- **[swift-testing-playbook.md](./llms/swift-testing-playbook.md)** - Best practices and patterns for Swift Testing
+
+These documents serve as knowledge references that can be included in CLAUDE.md files to provide AI assistants with up-to-date information about Swift frameworks and APIs.
