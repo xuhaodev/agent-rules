@@ -2,17 +2,6 @@
 
 A collection of reusable rules and knowledge documents for AI coding assistants like Claude Code and Cursor.
 
-## Why This Format?
-
-This repository uses the `.mdc` (Markdown with Configuration) format, which provides a unified approach that works seamlessly with both Claude Code and Cursor:
-
-- **Cursor** natively supports `.mdc` files with YAML frontmatter for rule configuration
-- **Claude Code** reads the markdown content, ignoring the frontmatter metadata
-- The YAML frontmatter provides optional metadata (description, file globs, alwaysApply) that Cursor uses for intelligent rule application
-- Standard markdown content ensures compatibility across different AI assistants
-
-This unified format means you can use the same rule files in both tools without modification.
-
 ## Repository Structure
 
 ### 📁 project-rules/
@@ -145,6 +134,17 @@ Feel free to contribute your own rules! Please ensure they:
 5. Are placed in the appropriate directory:
    - `project-rules/` for actionable AI assistant rules
    - `docs/` for reference documentation
+
+## Why This Format?
+
+This repository uses the `.mdc` (Markdown with Configuration) format, which provides a unified approach that works seamlessly with both Claude Code and Cursor:
+
+- **Cursor** natively supports `.mdc` files with YAML frontmatter for rule configuration
+- **Claude Code** reads the markdown content, ignoring the frontmatter metadata
+- The YAML frontmatter provides optional metadata (description, file globs, alwaysApply) that Cursor uses for intelligent rule application
+- Standard markdown content ensures compatibility across different AI assistants
+
+This unified format means you can use the same rule files in both tools without modification.
 
 ## License
 
