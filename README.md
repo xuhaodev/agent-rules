@@ -28,20 +28,13 @@ The `llms/` directory contains reference documentation for working with Large La
 - **[swift-testing-playbook.md](./llms/swift-testing-playbook.md)** - Best practices and patterns for Swift Testing
 - **[swift-argument-parser.md](./llms/swift-argument-parser.md)** - Swift Argument Parser framework for building command-line tools
 - **[swift6-migration.md](./llms/swift6-migration.md)** - Swift 6 migration guide with concurrency and language changes
+- **[mcp-releasing.md](./llms/mcp-releasing.md)** - Generic guide for releasing MCP servers as NPM packages
 
-These documents serve as knowledge references that can be included in CLAUDE.md files to provide AI assistants with up-to-date information about Swift frameworks and APIs.
+These documents serve as knowledge references that can be included in CLAUDE.md files to provide AI assistants with up-to-date information about Swift frameworks, APIs, and development workflows.
 
 ## Cursor Rules
 
 The `cursor-rules/` directory contains reusable Cursor AI rules and patterns collected from various projects:
-
-### Development Guidelines
-
-- **[mcp-development-guidelines.md](./cursor-rules/mcp-development-guidelines.md)** - Comprehensive security-first development guidelines for MCP servers
-  - Path validation and security patterns
-  - Error handling standards
-  - Testing strategies
-  - TypeScript best practices
 
 ### Meta-Rules
 
