@@ -29,6 +29,7 @@ The `llms/` directory contains reference documentation for working with Large La
 - **[swift-argument-parser.md](./llms/swift-argument-parser.md)** - Swift Argument Parser framework for building command-line tools
 - **[swift6-migration.md](./llms/swift6-migration.md)** - Swift 6 migration guide with concurrency and language changes
 - **[mcp-releasing.md](./llms/mcp-releasing.md)** - Generic guide for releasing MCP servers as NPM packages
+- **[mcp-best-practices.md](./llms/mcp-best-practices.md)** - Best practices for building Model Context Protocol servers
 
 These documents serve as knowledge references that can be included in CLAUDE.md files to provide AI assistants with up-to-date information about Swift frameworks, APIs, and development workflows.
 
