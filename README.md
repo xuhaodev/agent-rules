@@ -28,3 +28,51 @@ The `llms/` directory contains reference documentation for working with Large La
 - **[swift-testing-playbook.md](./llms/swift-testing-playbook.md)** - Best practices and patterns for Swift Testing
 
 These documents serve as knowledge references that can be included in CLAUDE.md files to provide AI assistants with up-to-date information about Swift frameworks and APIs.
+
+## Cursor Rules
+
+The `cursor-rules/` directory contains reusable Cursor AI rules and patterns collected from various projects:
+
+### Development Guidelines
+
+- **[mcp-development-guidelines.md](./cursor-rules/mcp-development-guidelines.md)** - Comprehensive security-first development guidelines for MCP servers
+  - Path validation and security patterns
+  - Error handling standards
+  - Testing strategies
+  - TypeScript best practices
+
+### Meta-Rules
+
+- **[cursor-rules-meta-guide.md](./cursor-rules/cursor-rules-meta-guide.md)** - Guidelines for creating and maintaining Cursor rules
+  - Rule structure and formatting
+  - File reference syntax
+  - Best practices for rule documentation
+
+### Automation Patterns
+
+- **[safari-automation.md](./cursor-rules/safari-automation.md)** - Advanced Safari browser automation techniques
+  - AppleScript patterns for window/tab management
+  - JavaScript execution strategies
+  - Shadow DOM interaction
+  - Timing and synchronization patterns
+
+- **[mcp-inspector-debugging.md](./cursor-rules/mcp-inspector-debugging.md)** - Debugging MCP servers with Inspector UI
+  - Multi-tool orchestration (Playwright, iTerm, Claude Code)
+  - Phase-based debugging approach
+  - Troubleshooting strategies
+
+These rules demonstrate proven patterns for project development, automation, testing, and debugging that can be adapted for your own projects.
+
+## Claude Code Plan Mode
+
+**New in Claude Code**: Plan mode allows you to review implementation plans before making changes. This feature is perfect for complex changes where you want to nail the approach before diving in.
+
+Plan mode enables Claude to create comprehensive plans for code changes, breaking down tasks into clear steps with file locations and specific modifications. This helps ensure accuracy and allows you to review the approach before any code is written.
+
+**Learn more**: [Announcement tweet by @_catwu](https://x.com/_catwu/status/1932857816131547453)
+
+## Resources
+
+### Blog Posts
+- [How I Use Claude Code](https://spiess.dev/blog/how-i-use-claude-code) - Practical tips and workflows for using Claude Code effectively
+- [Claude Code is My Computer](https://steipete.me/posts/2025/claude-code-is-my-computer) - Deep dive into Claude Code as a development environment
