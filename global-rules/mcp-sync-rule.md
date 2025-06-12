@@ -305,7 +305,29 @@ echo "Remember to adjust the format for VS Code (wrap in 'mcp.servers' instead o
 
 1. Save the script above as `mcp-sync.sh`
 2. Make it executable: `chmod +x mcp-sync.sh`
-3. Run it: `./mcp-sync.sh`
+3. Use the script with various options:
+
+### Basic Usage
+
+```bash
+# List all servers and show differences
+./mcp-sync.sh
+
+# Show help
+./mcp-sync.sh --help
+```
+
+### Switching Between Local and Global Configurations
+
+```bash
+# Switch a server from local path to global npm package
+./mcp-sync.sh --to-global terminator --app cursor
+
+# Switch a server from global npm package to local path
+./mcp-sync.sh --to-local peekaboo --app claude-desktop
+```
+
+### Features
 
 The script will:
 - Locate all MCP configuration files on your system
@@ -314,6 +336,21 @@ The script will:
 - Show which servers are unique to specific apps
 - Highlight configuration differences for common servers
 - Provide recommendations for synchronization
+- **NEW**: Switch servers between local development paths and global npm packages
+
+### Switching Details
+
+**Local to Global (`--to-global`)**:
+- Converts a local file path configuration to use `npx` with an npm package
+- Automatically recognizes common servers (terminator, agent, automator, conduit, peekaboo)
+- Prompts for npm package name for unknown servers
+- Preserves environment variables and other settings
+
+**Global to Local (`--to-local`)**:
+- Converts an npm package configuration to use a local file path
+- Automatically detects file type and selects appropriate command (node, python, bash)
+- Validates that the local file exists (with option to continue anyway)
+- Preserves environment variables and other settings
 
 ## Manual Synchronization Steps
 

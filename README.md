@@ -17,9 +17,35 @@ This unified format means you can use the same rule files in both tools without 
 
 ### 📁 project-rules/
 Actionable rules for AI assistants to follow during development:
+
+**Development Workflows** (Credit: [@vincenthopf](https://github.com/vincenthopf/claude-code))
+- **[commit.mdc](./project-rules/commit.mdc)** - Standard commit with conventional format and emojis
+- **[commit-fast.mdc](./project-rules/commit-fast.mdc)** - Fast commit workflow that auto-selects the first message
+- **[add-to-changelog.mdc](./project-rules/add-to-changelog.mdc)** - Structured changelog updates following Keep a Changelog format
+- **[pr-review.mdc](./project-rules/pr-review.mdc)** - Multi-role pull request review checklist
+
+**Code Quality & Analysis**
+- **[check.mdc](./project-rules/check.mdc)** - Comprehensive code quality checks across different languages
+- **[clean.mdc](./project-rules/clean.mdc)** - Fix all formatting and linting issues
+- **[code-analysis.mdc](./project-rules/code-analysis.mdc)** - Advanced multi-faceted code analysis options
+
+**Problem Solving & Implementation**
+- **[analyze-issue.mdc](./project-rules/analyze-issue.mdc)** - GitHub issue analysis and implementation specification
+- **[bug-fix.mdc](./project-rules/bug-fix.mdc)** - Complete bug-fixing workflow from issue to PR
+- **[implement-task.mdc](./project-rules/implement-task.mdc)** - Methodical task implementation approach
+- **[five.mdc](./project-rules/five.mdc)** - Five Whys root cause analysis technique
+
+**Documentation & Visualization**
+- **[create-docs.mdc](./project-rules/create-docs.mdc)** - Comprehensive documentation generation
+- **[mermaid.mdc](./project-rules/mermaid.mdc)** - Mermaid diagram generation for various visualizations
+
+**Project Setup & Meta**
+- **[context-prime.mdc](./project-rules/context-prime.mdc)** - Load project context comprehensively
+- **[create-command.mdc](./project-rules/create-command.mdc)** - Guide for creating new custom commands
 - **[continuous-improvement.mdc](./project-rules/continuous-improvement.mdc)** - Systematic approach for improving AI assistant rules
 - **[cursor-rules-meta-guide.mdc](./project-rules/cursor-rules-meta-guide.mdc)** - Guidelines for creating and maintaining Cursor rules
-- **[github-issue-creation.mdc](./project-rules/github-issue-creation.mdc)** - Creating well-structured GitHub issues (Credit: [@nityeshaga](https://x.com/nityeshaga/status/1933113428379574367))
+
+**Automation & Integration**
 - **[mcp-inspector-debugging.mdc](./project-rules/mcp-inspector-debugging.mdc)** - Debugging MCP servers with Inspector UI
 - **[safari-automation.mdc](./project-rules/safari-automation.mdc)** - Advanced Safari browser automation techniques
 - **[screenshot-automation.mdc](./project-rules/screenshot-automation.mdc)** - AppleScript patterns for automated screenshots
@@ -39,7 +65,10 @@ Reference documentation and knowledge bases:
   - [mcp-releasing.mdc](./docs/mcp-releasing.mdc) - Guide for releasing MCP servers as NPM packages
 
 ### 📁 global-rules/
-Global Claude Code configuration and automation scripts:
+Global Claude Code configuration and automation scripts (place in `~/.claude/CLAUDE.md`):
+- **[github-issue-creation.mdc](./global-rules/github-issue-creation.mdc)** - Creating well-structured GitHub issues (Credit: [@nityeshaga](https://x.com/nityeshaga/status/1933113428379574367))
+- **[mcp-peekaboo-setup.mdc](./global-rules/mcp-peekaboo-setup.mdc)** - Setup guide for Peekaboo vision-enabled MCP server
+- **[terminal-title-wrapper.zsh](./global-rules/terminal-title-wrapper.zsh)** - ZSH wrapper for dynamic terminal titles
 - **[mcp-sync.sh](./global-rules/mcp-sync.sh)** - Script to sync MCP servers across Claude installations
 - **[mcp-sync-rule.md](./global-rules/mcp-sync-rule.md)** - Documentation for MCP sync functionality
 
@@ -97,7 +126,8 @@ Dynamic terminal titles for better multi-instance organization.
 
 3. **For terminal title management:**
    ```bash
-   # Create wrapper script
+   # Copy wrapper script
+   cp global-rules/terminal-title-wrapper.zsh ~/.config/zsh/claude-wrapper.zsh
    mkdir -p ~/.config/zsh
    # Add claude-wrapper.zsh content
    
