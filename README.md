@@ -38,6 +38,11 @@ Reference documentation and knowledge bases:
   - [mcp-best-practices.mdc](./docs/mcp-best-practices.mdc) - Best practices for building Model Context Protocol servers
   - [mcp-releasing.mdc](./docs/mcp-releasing.mdc) - Guide for releasing MCP servers as NPM packages
 
+### 📁 global-rules/
+Global Claude Code configuration and automation scripts:
+- **[mcp-sync.sh](./global-rules/mcp-sync.sh)** - Script to sync MCP servers across Claude installations
+- **[mcp-sync-rule.md](./global-rules/mcp-sync-rule.md)** - Documentation for MCP sync functionality
+
 ## Usage
 
 ### For Cursor Users
@@ -51,6 +56,54 @@ Reference documentation and knowledge bases:
 2. Or reference the entire file using the `@import` syntax in your `CLAUDE.md`
 3. Place in your project root or `~/.claude/CLAUDE.md` for global rules
 4. Both project rules and documentation can be included
+
+## Global Claude Code Rules
+
+These are powerful global rules that can be placed in `~/.claude/CLAUDE.md` to enhance Claude Code's capabilities across all projects. Based on strategies from ["Commanding Your Claude Code Army"](https://steipete.me/posts/2025/commanding-your-claude-code-army).
+
+### Available Global Rules
+
+#### 1. GitHub Issue Creation
+Transforms feature descriptions into well-structured GitHub issues following best practices.
+- **Credit:** [@nityeshaga](https://x.com/nityeshaga/status/1933113428379574367)
+- **Features:** Repository research, convention analysis, automatic `gh issue create` integration
+- **Usage:** Provide a feature description and repository URL
+
+#### 2. MCP Server Setup - Peekaboo
+Automated setup for the Peekaboo vision-enabled MCP server.
+- **Features:** Screenshot capture with AI analysis, dual provider support (OpenAI/Ollama)
+- **Security:** Secure API key extraction from `~/.zshrc`
+- **Requirements:** Node.js 20.0+, macOS 14.0+
+
+#### 3. Terminal Title Management
+Dynamic terminal titles for better multi-instance organization.
+- **Features:** Shows `~/path/to/project — Claude` format
+- **Implementation:** ZSH wrapper function (`cly`) with background title persistence
+- **Benefits:** Easy identification of multiple Claude instances
+
+### Installation
+
+1. **Create Claude configuration directory:**
+   ```bash
+   mkdir -p ~/.claude
+   ```
+
+2. **Set up global rules:**
+   ```bash
+   # Create or edit global CLAUDE.md
+   nano ~/.claude/CLAUDE.md
+   # Add desired rules from this repository
+   ```
+
+3. **For terminal title management:**
+   ```bash
+   # Create wrapper script
+   mkdir -p ~/.config/zsh
+   # Add claude-wrapper.zsh content
+   
+   # Source in ~/.zshrc
+   echo '[[ -f ~/.config/zsh/claude-wrapper.zsh ]] && source ~/.config/zsh/claude-wrapper.zsh' >> ~/.zshrc
+   ```
 
 ## Contributing
 
