@@ -1,6 +1,6 @@
 ---
-description: 
-globs: e2e,tests
+description: Debugging and verifying MCP servers using the MCP Inspector UI with Playwright automation
+globs: "e2e/**/*.js, tests/**/*.js"
 alwaysApply: false
 ---
 Rule Name: mcp-inspector

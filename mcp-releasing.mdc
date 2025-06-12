@@ -1,3 +1,9 @@
+---
+description: Steps and procedures for releasing MCP (Model Context Protocol) servers as NPM packages
+globs: "package.json, **/package.json"
+alwaysApply: false
+---
+
 # Releasing MCP Servers
 
 This document outlines the steps to release a new version of an MCP (Model Context Protocol) server as an NPM package.

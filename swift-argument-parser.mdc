@@ -1,3 +1,9 @@
+---
+description: Documentation and usage patterns for Swift Argument Parser for command-line tools
+globs: "**/*.swift"
+alwaysApply: false
+---
+
 # https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser llms-full.txt
 
 ## Swift Argument Parser

@@ -1,3 +1,9 @@
+---
+description: Swift Observation framework documentation and usage patterns for reactive programming
+globs: "**/*.swift"
+alwaysApply: false
+---
+
 # https://developer.apple.com/documentation/testing llms-full.txt
 
 ## Swift Testing Overview

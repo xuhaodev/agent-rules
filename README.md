@@ -1,74 +1,62 @@
-# agent-rules
-Rules and Knowledge to work better with agents such as Claude Code or Cursor
+# Agent Rules
+
+A collection of reusable rules and knowledge documents for AI coding assistants like Claude Code and Cursor.
+
+## Why This Format?
+
+This repository uses the `.mdc` (Markdown with Configuration) format, which provides a unified approach that works seamlessly with both Claude Code and Cursor:
+
+- **Cursor** natively supports `.mdc` files with YAML frontmatter for rule configuration
+- **Claude Code** reads the markdown content, ignoring the frontmatter metadata
+- The YAML frontmatter provides optional metadata (description, file globs, alwaysApply) that Cursor uses for intelligent rule application
+- Standard markdown content ensures compatibility across different AI assistants
+
+This unified format means you can use the same rule files in both tools without modification.
+
+## Usage
+
+### For Cursor Users
+1. Copy any `.mdc` file to your project's `.cursor/rules/` directory
+2. Cursor will automatically apply rules based on the glob patterns in the frontmatter
+3. Rules with `alwaysApply: true` will be active for all files
+
+### For Claude Code Users
+1. Copy the content of any `.mdc` file (excluding the frontmatter) into your `CLAUDE.md` file
+2. Or reference the entire file using the `@import` syntax in your `CLAUDE.md`
+3. Place in your project root or `~/.claude/CLAUDE.md` for global rules
 
 ## Available Rules
 
-### GitHub Issue Creation
-**Credit**: [@nityeshaga](https://x.com/nityeshaga/status/1933113428379574367)
+### Swift Development
+- **[swift-observable.mdc](./swift-observable.mdc)** - Migration guide from ObservableObject to @Observable macro
+- **[swift-observation.mdc](./swift-observation.mdc)** - Swift Observation framework documentation
+- **[swift-testing-api.mdc](./swift-testing-api.mdc)** - Swift Testing framework API reference
+- **[swift-testing-playbook.mdc](./swift-testing-playbook.mdc)** - Comprehensive guide for migrating to Swift Testing
+- **[swift-argument-parser.mdc](./swift-argument-parser.mdc)** - Swift Argument Parser framework documentation
+- **[swift6-migration.mdc](./swift6-migration.mdc)** - Guide for migrating to Swift 6 with concurrency
 
-A comprehensive rule for creating well-structured GitHub issues from feature descriptions. This rule guides AI assistants through a 5-step process:
+### MCP Development
+- **[mcp-best-practices.mdc](./mcp-best-practices.mdc)** - Best practices for building Model Context Protocol servers
+- **[mcp-releasing.mdc](./mcp-releasing.mdc)** - Guide for releasing MCP servers as NPM packages
+- **[mcp-inspector-debugging.mdc](./mcp-inspector-debugging.mdc)** - Debugging MCP servers with Inspector UI
 
-1. **Research the repository** - Examines existing issues, documentation, and contribution guidelines
-2. **Research best practices** - Studies current standards and examples from popular projects
-3. **Present a plan** - Outlines the proposed issue structure with labels and milestones
-4. **Create the issue** - Drafts complete issue content with title, description, and acceptance criteria
-5. **Final output** - Provides ready-to-use GitHub issue content
+### Automation & Tools
+- **[safari-automation.mdc](./safari-automation.mdc)** - Advanced Safari browser automation techniques
+- **[screenshot-automation.mdc](./screenshot-automation.mdc)** - AppleScript patterns for automated screenshots
+- **[github-issue-creation.mdc](./github-issue-creation.mdc)** - Creating well-structured GitHub issues (Credit: [@nityeshaga](https://x.com/nityeshaga/status/1933113428379574367))
 
-**Usage**: Add the content from `github-issue-creation.md` to your global or project-specific CLAUDE.md file.
+### Meta Rules
+- **[cursor-rules-meta-guide.mdc](./cursor-rules-meta-guide.mdc)** - Guidelines for creating and maintaining Cursor rules
+- **[continuous-improvement.mdc](./continuous-improvement.mdc)** - Systematic approach for improving AI assistant rules
 
-**Location**: [`github-issue-creation.md`](./github-issue-creation.md)
+## Contributing
 
-## LLM Documentation
+Feel free to contribute your own rules! Please ensure they:
+1. Use the `.mdc` extension
+2. Include proper YAML frontmatter with `description`, `globs`, and `alwaysApply` fields
+3. Contain clear, actionable instructions
+4. Are generic enough to be reused across projects
 
-The `llms/` directory contains reference documentation for working with Large Language Models, particularly focused on Swift development:
+## License
 
-- **[swift-observable.md](./llms/swift-observable.md)** - Documentation for Swift's @Observable macro and observation framework
-- **[swift-observation.md](./llms/swift-observation.md)** - Swift Observation framework details and patterns
-- **[swift-testing-api.md](./llms/swift-testing-api.md)** - Swift Testing framework API reference
-- **[swift-testing-playbook.md](./llms/swift-testing-playbook.md)** - Best practices and patterns for Swift Testing
-- **[swift-argument-parser.md](./llms/swift-argument-parser.md)** - Swift Argument Parser framework for building command-line tools
-- **[swift6-migration.md](./llms/swift6-migration.md)** - Swift 6 migration guide with concurrency and language changes
-- **[mcp-releasing.md](./llms/mcp-releasing.md)** - Generic guide for releasing MCP servers as NPM packages
-- **[mcp-best-practices.md](./llms/mcp-best-practices.md)** - Best practices for building Model Context Protocol servers
-
-These documents serve as knowledge references that can be included in CLAUDE.md files to provide AI assistants with up-to-date information about Swift frameworks, APIs, and development workflows.
-
-## Cursor Rules
-
-The `cursor-rules/` directory contains reusable Cursor AI rules and patterns collected from various projects:
-
-### Meta-Rules
-
-- **[cursor-rules-meta-guide.md](./cursor-rules/cursor-rules-meta-guide.md)** - Guidelines for creating and maintaining Cursor rules
-  - Rule structure and formatting
-  - File reference syntax
-  - Best practices for rule documentation
-
-### Automation Patterns
-
-- **[safari-automation.md](./cursor-rules/safari-automation.md)** - Advanced Safari browser automation techniques
-  - AppleScript patterns for window/tab management
-  - JavaScript execution strategies
-  - Shadow DOM interaction
-  - Timing and synchronization patterns
-
-- **[mcp-inspector-debugging.md](./cursor-rules/mcp-inspector-debugging.md)** - Debugging MCP servers with Inspector UI
-  - Multi-tool orchestration (Playwright, iTerm, Claude Code)
-  - Phase-based debugging approach
-  - Troubleshooting strategies
-
-These rules demonstrate proven patterns for project development, automation, testing, and debugging that can be adapted for your own projects.
-
-## Claude Code Plan Mode
-
-**New in Claude Code**: Plan mode allows you to review implementation plans before making changes. This feature is perfect for complex changes where you want to nail the approach before diving in.
-
-Plan mode enables Claude to create comprehensive plans for code changes, breaking down tasks into clear steps with file locations and specific modifications. This helps ensure accuracy and allows you to review the approach before any code is written.
-
-**Learn more**: [Announcement tweet by @_catwu](https://x.com/_catwu/status/1932857816131547453)
-
-## Resources
-
-### Blog Posts
-- [How I Use Claude Code](https://spiess.dev/blog/how-i-use-claude-code) - Practical tips and workflows for using Claude Code effectively
-- [Claude Code is My Computer](https://steipete.me/posts/2025/claude-code-is-my-computer) - Deep dive into Claude Code as a development environment
+MIT License - See [LICENSE](./LICENSE) for details

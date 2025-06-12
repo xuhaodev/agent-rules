@@ -1,3 +1,9 @@
+---
+description: Guide for migrating Swift code to Swift 6 with concurrency and strict checking
+globs: "**/*.swift"
+alwaysApply: false
+---
+
 ================================================
 FILE: README.md
 ================================================

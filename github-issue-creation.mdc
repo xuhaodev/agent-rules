@@ -1,3 +1,9 @@
+---
+description: Instructions for creating well-structured GitHub issues following best practices and project conventions
+globs: ""
+alwaysApply: false
+---
+
 # GitHub Issue Creation
 
 Credit: This rule is based on instructions by @nityeshaga (https://x.com/nityeshaga/status/1933113428379574367)

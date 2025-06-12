@@ -1,3 +1,9 @@
+---
+description: Comprehensive guide for migrating from XCTest to Swift Testing with best practices from WWDC 2024
+globs: "**/*Tests.swift, **/*Test.swift"
+alwaysApply: false
+---
+
 # The Ultimate Swift Testing Playbook (2024 WWDC Edition, expanded with Apple docs from June 2025)
 https://developer.apple.com/xcode/swift-testing/
 
