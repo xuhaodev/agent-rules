@@ -2,8 +2,6 @@
 
 **For Claude Code and other AI-enabled IDEs**
 
-Learn more about MCP servers and slash commands: https://steipete.me/posts/2025/commanding-your-claude-code-army
-
 ## 🚨 Instructions for AI Assistants
 
 When helping users set up MCP servers:
@@ -192,6 +190,25 @@ Then run `source ~/.zshrc`
 - Always extract keys from environment variables
 - Ensure local paths exist before adding (e.g., Obsidian MCP server)
 - Use `mcp-sync.sh` to compare configs across different apps
+
+## Terminal Title Trick
+
+Add this to your `~/.zshrc` to see which folder Claude Code is working on:
+
+```bash
+cly () {
+    local folder=${PWD:t} 
+    echo -ne "\033]0;$folder — Claude\007"  # Set terminal title
+    "$HOME/.claude/local/claude" --dangerously-skip-permissions "$@"
+    local exit_code=$? 
+    echo -ne "\033]0;%~\007"  # Restore title
+    return $exit_code
+}
+```
+
+This shows the current folder name in your terminal tab, making it easy to track multiple Claude Code instances.
+
+Learn more tricks at: https://steipete.me/posts/2025/commanding-your-claude-code-army
 
 ## Presentation Template
 
