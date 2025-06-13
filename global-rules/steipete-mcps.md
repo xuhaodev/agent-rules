@@ -1,6 +1,8 @@
 # Steipete's MCP Server Configuration
 
-This document contains all MCP (Model Context Protocol) servers configured for @steipete, along with installation instructions for future AI assistants.
+**⚠️ IMPORTANT: This guide is for Claude Code (the CLI tool), NOT Claude Desktop! ⚠️**
+
+This document contains all MCP (Model Context Protocol) servers configured for @steipete, along with installation instructions for future AI assistants working with Claude Code.
 
 ## 🚨 CRITICAL INSTRUCTIONS FOR AI ASSISTANTS
 
@@ -11,6 +13,8 @@ This document contains all MCP (Model Context Protocol) servers configured for @
 3. **Check Prerequisites** - ALWAYS verify Obsidian.app exists before mentioning Obsidian MCP
 4. **Conditional Recommendations** - Only suggest servers whose prerequisites are met
 5. **Work With What Exists** - Only configure tools already installed on the user's system
+6. **NEVER SUGGEST DOWNLOADS** - Do NOT provide download links for Claude Desktop, VS Code, or any IDE
+7. **ASSUME CLAUDE CODE** - When users mention "Claude", assume they mean Claude Code (the CLI)
 
 ## 📥 Quick Start - Fetching Related Files
 
@@ -110,7 +114,7 @@ When helping users set up MCP servers, follow these rules STRICTLY:
 
 5. **Presentation format**:
    ```
-   Based on your system, I recommend these MCP servers:
+   Based on your system, I recommend these MCP servers for Claude Code:
    
    Essential (work immediately):
    • Peekaboo - Take screenshots (no AI key required)
@@ -123,6 +127,9 @@ When helping users set up MCP servers, follow these rules STRICTLY:
    
    [Only show if Obsidian.app exists]:
    • Obsidian - Connect to your knowledge base
+   
+   To install in Claude Code:
+   claude mcp add-json -s user [server-name] '{...}'
    ```
 
 6. **NEVER suggest these actions**:
@@ -132,6 +139,19 @@ When helping users set up MCP servers, follow these rules STRICTLY:
    - Setting up servers the user hasn't asked for
    - Mentioning servers whose prerequisites aren't met
    - Recommending the user install missing prerequisites
+
+### ❌ WRONG APPROACH (Never do this):
+```
+To set up MCP servers:
+1. Install Claude Desktop from https://claude.ai
+2. Create configuration file...
+```
+
+### ✅ CORRECT APPROACH (Always do this):
+```
+To set up MCP servers in Claude Code:
+claude mcp add-json -s user peekaboo '{...}'
+```
 
 If you're Claude or another AI assistant, you can read these files directly using available tools:
 
@@ -444,12 +464,10 @@ fi
 ### Prerequisites Check & Installation
 
 ```bash
-# 1. Check for jq (required for JSON manipulation)
+# 1. Check and install jq (required for JSON manipulation)
 if ! command -v jq &> /dev/null; then
-    echo "❌ jq is not installed"
-    echo "   This script requires jq for JSON manipulation"
-    echo "   Please ask your system administrator to install it"
-    exit 1
+    echo "Installing jq..."
+    brew install jq
 else
     echo "✓ jq is installed"
 fi
@@ -457,25 +475,25 @@ fi
 # 2. Check Node.js version (required: v20.0+)
 NODE_VERSION=$(node -v 2>/dev/null | sed 's/v//' | cut -d. -f1)
 if [ -z "$NODE_VERSION" ] || [ "$NODE_VERSION" -lt 20 ]; then
-    echo "❌ Node.js 20+ required. Current: $(node -v 2>/dev/null || echo 'Not installed')"
-    echo "   MCP servers require Node.js version 20 or higher"
-    echo "   Please ask your system administrator to update Node.js"
+    echo "⚠️  Node.js 20+ required. Current: $(node -v 2>/dev/null || echo 'Not installed')"
+    echo "Install via: brew install node or use nvm"
     exit 1
 else
     echo "✓ Node.js $(node -v) is installed"
 fi
 
-# 3. Check for Ollama (optional - for Peekaboo fallback)
+# 3. Check and install Ollama (for Peekaboo fallback)
 if ! command -v ollama &> /dev/null; then
-    echo "⚠️  Ollama not found (optional)"
-    echo "   Peekaboo will use OpenAI API only"
-    echo "   For local AI fallback, ask your administrator to install Ollama"
+    echo "Installing Ollama for Peekaboo fallback..."
+    brew install ollama
+    # Pull the vision model
+    ollama pull llava:latest
 else
     echo "✓ Ollama is installed"
-    # Check if vision model is available
+    # Ensure vision model is available
     if ! ollama list | grep -q "llava:latest"; then
-        echo "   Note: llava:latest model not found"
-        echo "   Run 'ollama pull llava:latest' for local vision AI"
+        echo "Pulling llava:latest model..."
+        ollama pull llava:latest
     fi
 fi
 
@@ -935,21 +953,29 @@ echo "\n🔍 Verifying installations..."
 echo -n "Claude Code: "
 claude mcp list -s user | grep -E "peekaboo|context7|github|agent|automator|gitmcp|firecrawl|obsidian|playwright" | wc -l | xargs -I {} echo "{}/9 servers"
 
-# Check Claude Desktop
-echo -n "Claude Desktop: "
-jq '.mcpServers | keys | length' ~/Library/Application\ Support/Claude/claude_desktop_config.json 2>/dev/null || echo "0 servers"
+# Check Claude Desktop (if already installed)
+if [ -f ~/Library/Application\ Support/Claude/claude_desktop_config.json ]; then
+    echo -n "Claude Desktop: "
+    jq '.mcpServers | keys | length' ~/Library/Application\ Support/Claude/claude_desktop_config.json 2>/dev/null || echo "0 servers"
+fi
 
-# Check Cursor
-echo -n "Cursor: "
-jq '.mcpServers | keys | length' ~/.cursor/mcp.json 2>/dev/null || echo "0 servers"
+# Check Cursor (if already installed)
+if [ -f ~/.cursor/mcp.json ]; then
+    echo -n "Cursor: "
+    jq '.mcpServers | keys | length' ~/.cursor/mcp.json 2>/dev/null || echo "0 servers"
+fi
 
-# Check Windsurf
-echo -n "Windsurf: "
-jq '.mcpServers | keys | length' ~/.codeium/windsurf/mcp_config.json 2>/dev/null || echo "0 servers"
+# Check Windsurf (if already installed)
+if [ -f ~/.codeium/windsurf/mcp_config.json ]; then
+    echo -n "Windsurf: "
+    jq '.mcpServers | keys | length' ~/.codeium/windsurf/mcp_config.json 2>/dev/null || echo "0 servers"
+fi
 
-# Check VS Code
-echo -n "VS Code: "
-jq '.mcp.servers | keys | length' ~/Library/Application\ Support/Code/User/settings.json 2>/dev/null || echo "0 servers"
+# Check VS Code (if already installed)
+if [ -f ~/Library/Application\ Support/Code/User/settings.json ]; then
+    echo -n "VS Code: "
+    jq '.mcp.servers | keys | length' ~/Library/Application\ Support/Code/User/settings.json 2>/dev/null || echo "0 servers"
+fi
 
 # Run sync script to see full analysis
 echo "\n📊 Running sync script for detailed analysis..."
@@ -1024,9 +1050,9 @@ source ~/.zshrc  # Load environment variables
 
 # Check prerequisites
 echo "Checking prerequisites..."
-command -v jq &> /dev/null || { echo "❌ jq not installed. Required for JSON manipulation"; exit 1; }
-command -v node &> /dev/null || { echo "❌ Node.js not installed. Required for MCP servers"; exit 1; }
-command -v ollama &> /dev/null || echo "⚠️  Ollama not installed. Peekaboo will use OpenAI only"
+command -v jq &> /dev/null || { echo "❌ jq not installed. Run: brew install jq"; exit 1; }
+command -v node &> /dev/null || { echo "❌ Node.js not installed. Install Node.js 20+"; exit 1; }
+command -v ollama &> /dev/null || { echo "⚠️  Ollama not installed. Installing..."; brew install ollama; }
 
 # Extract API keys
 OPENAI_KEY=$(grep "export OPENAI_API_KEY=" ~/.zshrc | sed 's/export OPENAI_API_KEY="//' | sed 's/"$//')

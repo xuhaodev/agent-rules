@@ -4,9 +4,10 @@
 
 set -e
 
-echo "🚀 MCP Setup Helper"
-echo "==================="
-echo "This script will download all necessary files for MCP server setup."
+echo "🚀 MCP Setup Helper for Claude Code"
+echo "===================================="
+echo "This script will download all necessary files for MCP server setup in Claude Code."
+echo "Note: This is for Claude Code (the CLI tool), not Claude Desktop."
 echo ""
 
 # Create directory structure
