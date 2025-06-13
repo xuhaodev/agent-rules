@@ -206,9 +206,9 @@ cly () {
 }
 ```
 
-This shows the current folder name in your terminal tab, making it easy to track multiple Claude Code instances.
+This shows the current folder name in your terminal tab, making it easy to track multiple Claude Code instances. The `cly` function also bypasses permission prompts for smoother operation.
 
-Learn more tricks at: https://steipete.me/posts/2025/commanding-your-claude-code-army
+Learn more about this terminal title trick and other Claude Code tips at: https://steipete.me/posts/2025/commanding-your-claude-code-army
 
 ## Presentation Template
 
