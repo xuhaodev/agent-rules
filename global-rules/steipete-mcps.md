@@ -445,107 +445,49 @@ The GitHub MCP server requires a Personal Access Token for authentication. Here'
 }
 ```
 
-## Installation Instructions for Future AI
+## 🎯 Installation Guide for AI Assistants
 
-### API Key Options for Users
+When helping users set up Claude Code, use these simplified installation commands:
 
-Users have two options for providing API keys:
+### Complete Setup (Recommended)
+```bash
+# Install everything: MCP servers + slash commands
+bash <(curl -s https://raw.githubusercontent.com/steipete/agent-rules/refs/heads/main/global-rules/complete-claude-setup.sh)
+```
 
-1. **Add to ~/.zshrc (Recommended)**:
-   ```bash
-   echo 'export OPENAI_API_KEY="sk-..."' >> ~/.zshrc
-   echo 'export GITHUB_PERSONAL_ACCESS_TOKEN="ghp-..."' >> ~/.zshrc
-   echo 'export FIRECRAWL_API_KEY="fc-..."' >> ~/.zshrc
-   source ~/.zshrc
-   ```
+### Individual Components
+```bash
+# Check API keys first
+curl -s https://raw.githubusercontent.com/steipete/agent-rules/refs/heads/main/global-rules/scripts/check-api-keys.sh | bash
 
-2. **Paste directly in prompt**:
-   Users can paste their keys directly in the conversation:
-   ```
-   My API keys:
-   OPENAI_API_KEY=sk-...
-   GITHUB_PERSONAL_ACCESS_TOKEN=ghp-...
-   FIRECRAWL_API_KEY=fc-...
-   ```
-   
-   Then Claude can use these values during installation instead of reading from .zshrc.
+# Install MCP servers only
+curl -s https://raw.githubusercontent.com/steipete/agent-rules/refs/heads/main/global-rules/scripts/install-claude-mcps.sh | bash
 
-**Important**: Always remind users that Peekaboo is valuable even without the OpenAI key - it's the only way to take screenshots in Claude!
+# Install slash commands only
+git clone https://github.com/steipete/agent-rules.git && cd agent-rules && bash install-project-rules.sh
+```
+
+### API Key Setup
+
+Users should add API keys to ~/.zshrc:
+```bash
+echo 'export OPENAI_API_KEY="sk-..."' >> ~/.zshrc
+echo 'export GITHUB_PERSONAL_ACCESS_TOKEN="ghp-..."' >> ~/.zshrc
+echo 'export FIRECRAWL_API_KEY="fc-..."' >> ~/.zshrc
+source ~/.zshrc
+```
+
+Or provide them directly in the conversation for temporary use.
+
+**Remember**: Peekaboo works without OpenAI key - it's essential for screenshots!
 
 ### Step 0: Pre-Installation API Key Check
 
-Before installing MCP servers, check which API keys are available:
+Check which API keys are available:
 
 ```bash
-#!/bin/bash
-echo "🔍 Checking for required API keys in environment..."
-echo ""
-
-# Define which keys are required for which servers
-declare -A KEY_REQUIREMENTS=(
-    ["OPENAI_API_KEY"]="Peekaboo (for GPT-4 Vision)"
-    ["GITHUB_PERSONAL_ACCESS_TOKEN"]="GitHub MCP"
-    ["FIRECRAWL_API_KEY"]="Firecrawl web scraping"
-    ["OBSIDIAN_API_KEY"]="Obsidian (optional - has default)"
-)
-
-# Check each key
-MISSING_KEYS=()
-for key in "${!KEY_REQUIREMENTS[@]}"; do
-    if grep -q "export $key=" ~/.zshrc; then
-        echo "✓ $key found - Required for: ${KEY_REQUIREMENTS[$key]}"
-    else
-        echo "✗ $key missing - Required for: ${KEY_REQUIREMENTS[$key]}"
-        MISSING_KEYS+=("$key")
-    fi
-done
-
-# Check for Obsidian
-echo ""
-if [ -d "/Applications/Obsidian.app" ]; then
-    echo "✓ Obsidian.app found"
-    if [ -f "/Users/steipete/Documents/steipete/.obsidian/plugins/mcp-tools/bin/mcp-server" ]; then
-        echo "✓ Obsidian MCP Tools plugin installed"
-    else
-        echo "✗ Obsidian MCP Tools plugin not found"
-        echo "  Plugin available in Obsidian Community Plugins"
-    fi
-else
-    echo "✗ Obsidian.app not found - skipping Obsidian MCP"
-fi
-
-# Summary and recommendations
-echo ""
-if [ ${#MISSING_KEYS[@]} -eq 0 ]; then
-    echo "✅ All API keys found! Ready to install all MCP servers."
-else
-    echo "⚠️  Missing ${#MISSING_KEYS[@]} API keys. Some servers will be skipped or have limited functionality."
-    echo ""
-    echo "To add missing keys:"
-    for key in "${MISSING_KEYS[@]}"; do
-        case $key in
-            "OPENAI_API_KEY")
-                echo "1. For $key:"
-                echo "   - Get key from: https://platform.openai.com/api-keys"
-                echo "   - Add to ~/.zshrc: export OPENAI_API_KEY=\"sk-...\""
-                ;;
-            "GITHUB_PERSONAL_ACCESS_TOKEN")
-                echo "2. For $key:"
-                echo "   - Create at: https://github.com/settings/tokens"
-                echo "   - Select 'repo' scope"
-                echo "   - Add to ~/.zshrc: export GITHUB_PERSONAL_ACCESS_TOKEN=\"ghp_...\""
-                ;;
-            "FIRECRAWL_API_KEY")
-                echo "3. For $key:"
-                echo "   - Get key from: https://www.firecrawl.dev"
-                echo "   - Add to ~/.zshrc: export FIRECRAWL_API_KEY=\"fc-...\""
-                echo "   - Note: Required for Firecrawl to function"
-                ;;
-        esac
-    done
-    echo ""
-    echo "After adding keys, run: source ~/.zshrc"
-fi
+# Download and run the API key checker
+curl -s https://raw.githubusercontent.com/steipete/agent-rules/refs/heads/main/global-rules/scripts/check-api-keys.sh | bash
 ```
 
 ### Prerequisites Check & Installation
@@ -664,372 +606,39 @@ echo "  ✓ OBSIDIAN_API_KEY ready (${#OBSIDIAN_KEY} chars)"
 
 **IMPORTANT**: The `claude mcp add-json` command requires valid JSON. Always use proper quotes and escaping!
 
+For full installation with all servers:
+
 ```bash
-echo "📦 Installing MCP servers to Claude Code..."
-echo ""
-
-# Track installation status
-INSTALLED_COUNT=0
-SKIPPED_COUNT=0
-
-# 1. Peekaboo (requires OPENAI_API_KEY for full functionality)
-if [ -n "$OPENAI_KEY" ]; then
-    echo "✓ Installing Peekaboo with OpenAI support..."
-    claude mcp add-json -s user peekaboo "{
-      \"command\": \"npx\",
-      \"args\": [\"-y\", \"@steipete/peekaboo-mcp@beta\"],
-      \"env\": {
-        \"PEEKABOO_AI_PROVIDERS\": \"openai/gpt-4o,ollama/llava:latest\",
-        \"OPENAI_API_KEY\": \"$OPENAI_KEY\"
-      }
-    }"
-    ((INSTALLED_COUNT++))
-else
-    echo "⚠️  Installing Peekaboo with Ollama-only support (OPENAI_API_KEY missing)"
-    echo "   To enable GPT-4 Vision: export OPENAI_API_KEY=\"sk-...\" in ~/.zshrc"
-    claude mcp add-json -s user peekaboo "{
-      \"command\": \"npx\",
-      \"args\": [\"-y\", \"@steipete/peekaboo-mcp@beta\"],
-      \"env\": {
-        \"PEEKABOO_AI_PROVIDERS\": \"ollama/llava:latest\"
-      }
-    }"
-    ((INSTALLED_COUNT++))
-fi
-
-# 2. Context7 (no API key required)
-echo "✓ Installing Context7..."
-claude mcp add-json -s user context7 '{
-  "command": "npx",
-  "args": ["-y", "@upstash/context7-mcp@latest"]
-}'
-((INSTALLED_COUNT++))
-
-# 3. GitHub (requires GITHUB_PERSONAL_ACCESS_TOKEN)
-if [ -n "$GITHUB_TOKEN" ]; then
-    echo "✓ Installing GitHub with authentication..."
-    claude mcp add-json -s user github "{
-      \"command\": \"npx\",
-      \"args\": [\"-y\", \"@modelcontextprotocol/server-github\"],
-      \"env\": {
-        \"GITHUB_PERSONAL_ACCESS_TOKEN\": \"$GITHUB_TOKEN\"
-      }
-    }"
-    ((INSTALLED_COUNT++))
-else
-    echo "✗ Skipping GitHub MCP (GITHUB_PERSONAL_ACCESS_TOKEN missing)"
-    echo "   To install: "
-    echo "   1. Create token at https://github.com/settings/tokens"
-    echo "   2. Add to ~/.zshrc: export GITHUB_PERSONAL_ACCESS_TOKEN=\"ghp_...\""
-    ((SKIPPED_COUNT++))
-fi
-
-# 4. Agent (no API key required)
-echo "✓ Installing Agent..."
-claude mcp add-json -s user agent '{
-  "command": "npx",
-  "args": ["-y", "@steipete/claude-code-mcp@latest"]
-}'
-((INSTALLED_COUNT++))
-
-# 5. Automator (no API key required)
-echo "✓ Installing Automator..."
-claude mcp add-json -s user automator '{
-  "command": "npx",
-  "args": ["-y", "@steipete/macos-automator-mcp@latest"],
-  "env": {
-    "LOG_LEVEL": "INFO"
-  }
-}'
-((INSTALLED_COUNT++))
-
-# 6. GitMCP (no API key required)
-echo "✓ Installing GitMCP..."
-claude mcp add -s user -t sse gitmcp https://gitmcp.io/docs
-((INSTALLED_COUNT++))
-
-# 7. Firecrawl (requires API key)
-if [ -n "$FIRECRAWL_KEY" ]; then
-    echo "✓ Installing Firecrawl with API key..."
-    claude mcp add-json -s user firecrawl-mcp "{
-      \"command\": \"npx\",
-      \"args\": [\"-y\", \"firecrawl-mcp\"],
-      \"env\": {
-        \"FIRECRAWL_API_KEY\": \"$FIRECRAWL_KEY\"
-      }
-    }"
-    ((INSTALLED_COUNT++))
-else
-    echo "✗ Skipping Firecrawl MCP (FIRECRAWL_API_KEY missing)"
-    echo "   To install:"
-    echo "   1. Get API key from https://www.firecrawl.dev"
-    echo "   2. Add to ~/.zshrc: export FIRECRAWL_API_KEY=\"fc-...\""
-    ((SKIPPED_COUNT++))
-fi
-
-# 8. Obsidian (requires Obsidian.app and plugin)
-if [ -d "/Applications/Obsidian.app" ]; then
-    if [ -f "/Users/steipete/Documents/steipete/.obsidian/plugins/mcp-tools/bin/mcp-server" ]; then
-        echo "✓ Installing Obsidian MCP Tools..."
-        claude mcp add-json -s user obsidian-mcp-tools "{
-          \"command\": \"/Users/steipete/Documents/steipete/.obsidian/plugins/mcp-tools/bin/mcp-server\",
-          \"env\": {
-            \"OBSIDIAN_API_KEY\": \"$OBSIDIAN_KEY\"
-          }
-        }"
-        ((INSTALLED_COUNT++))
-    else
-        echo "✗ Skipping Obsidian MCP (plugin not installed)"
-        echo "   To install: Enable 'MCP Tools' in Obsidian Community Plugins"
-        ((SKIPPED_COUNT++))
-    fi
-else
-    echo "✗ Skipping Obsidian MCP (Obsidian.app not found)"
-    ((SKIPPED_COUNT++))
-fi
-
-# 9. Playwright (no API key required)
-echo "✓ Installing Playwright..."
-claude mcp add-json -s user playwright '{
-  "command": "npx",
-  "args": ["@playwright/mcp@latest"]
-}'
-((INSTALLED_COUNT++))
-
-echo ""
-echo "📊 Claude Code Installation Summary:"
-echo "   ✓ Installed: $INSTALLED_COUNT servers"
-echo "   ✗ Skipped: $SKIPPED_COUNT servers"
-
-if [ $SKIPPED_COUNT -gt 0 ]; then
-    echo ""
-    echo "💡 To install skipped servers:"
-    echo "   1. Add missing API keys to ~/.zshrc"
-    echo "   2. Run: source ~/.zshrc"
-    echo "   3. Re-run this installation script"
-fi
+# Download and run the Claude Code MCP installer
+curl -s https://raw.githubusercontent.com/steipete/agent-rules/refs/heads/main/global-rules/scripts/install-claude-mcps.sh | bash
 ```
 
-### Step 3: Install to Claude Desktop
+Or install servers individually using the commands from the [Quick Install Commands](#quick-install-commands) section above.
+
+### Step 3: Install to Claude Desktop (Optional)
+
+If you have Claude Desktop installed:
 
 ```bash
-# Backup first
-cp ~/Library/Application\ Support/Claude/claude_desktop_config.json ~/Library/Application\ Support/Claude/claude_desktop_config.json.backup
-
-# Create config file if it doesn't exist
-if [ ! -f ~/Library/Application\ Support/Claude/claude_desktop_config.json ]; then
-    echo '{"mcpServers":{}}' > ~/Library/Application\ Support/Claude/claude_desktop_config.json
-fi
-
-# Add all servers (excluding HTTP/SSE ones which Claude Desktop doesn't support)
-CONFIG_FILE=~/Library/Application\ Support/Claude/claude_desktop_config.json
-
-# 1. Peekaboo
-jq --arg key "$OPENAI_KEY" '.mcpServers.peekaboo = {
-  "command": "npx",
-  "args": ["-y", "@steipete/peekaboo-mcp@beta"],
-  "env": {
-    "PEEKABOO_AI_PROVIDERS": "openai/gpt-4o,ollama/llava:latest",
-    "OPENAI_API_KEY": $key
-  }
-}' "$CONFIG_FILE" > /tmp/claude_desktop_temp.json && mv /tmp/claude_desktop_temp.json "$CONFIG_FILE"
-
-# 2. Context7
-jq '.mcpServers.context7 = {
-  "command": "npx",
-  "args": ["-y", "@upstash/context7-mcp@latest"]
-}' "$CONFIG_FILE" > /tmp/claude_desktop_temp.json && mv /tmp/claude_desktop_temp.json "$CONFIG_FILE"
-
-# 3. Agent
-jq '.mcpServers.agent = {
-  "command": "npx",
-  "args": ["-y", "@steipete/claude-code-mcp@latest"]
-}' "$CONFIG_FILE" > /tmp/claude_desktop_temp.json && mv /tmp/claude_desktop_temp.json "$CONFIG_FILE"
-
-# 4. Automator
-jq '.mcpServers.automator = {
-  "command": "npx",
-  "args": ["-y", "@steipete/macos-automator-mcp@latest"],
-  "env": {
-    "LOG_LEVEL": "INFO"
-  }
-}' "$CONFIG_FILE" > /tmp/claude_desktop_temp.json && mv /tmp/claude_desktop_temp.json "$CONFIG_FILE"
-
-# 5. Firecrawl
-jq --arg key "$FIRECRAWL_KEY" '.mcpServers["firecrawl-mcp"] = {
-  "command": "npx",
-  "args": ["-y", "firecrawl-mcp"],
-  "env": {
-    "FIRECRAWL_API_KEY": $key
-  }
-}' "$CONFIG_FILE" > /tmp/claude_desktop_temp.json && mv /tmp/claude_desktop_temp.json "$CONFIG_FILE"
-
-# 6. Obsidian
-jq --arg key "$OBSIDIAN_KEY" '.mcpServers["obsidian-mcp-tools"] = {
-  "command": "/Users/steipete/Documents/steipete/.obsidian/plugins/mcp-tools/bin/mcp-server",
-  "env": {
-    "OBSIDIAN_API_KEY": $key
-  }
-}' "$CONFIG_FILE" > /tmp/claude_desktop_temp.json && mv /tmp/claude_desktop_temp.json "$CONFIG_FILE"
-
-# 7. Playwright
-jq '.mcpServers.playwright = {
-  "command": "npx",
-  "args": ["@playwright/mcp@latest"]
-}' "$CONFIG_FILE" > /tmp/claude_desktop_temp.json && mv /tmp/claude_desktop_temp.json "$CONFIG_FILE"
-
-echo "✓ Claude Desktop configuration updated (7 servers added, skipped GitHub with HTTP transport and GitMCP with SSE)"
+# Download and run the Claude Desktop MCP installer
+curl -s https://raw.githubusercontent.com/steipete/agent-rules/refs/heads/main/global-rules/scripts/install-claude-desktop-mcps.sh | bash
 ```
 
-### Step 4: Install to Cursor
+Note: Claude Desktop only supports stdio transport (no GitHub or GitMCP).
+
+### Step 4: Install to Other IDEs (Optional)
+
+For installation to other supported IDEs:
 
 ```bash
-# Backup first
-cp ~/.cursor/mcp.json ~/.cursor/mcp.json.backup 2>/dev/null || true
+# Cursor
+curl -s https://raw.githubusercontent.com/steipete/agent-rules/refs/heads/main/global-rules/scripts/install-cursor-mcps.sh | bash
 
-# Create config file if it doesn't exist
-if [ ! -f ~/.cursor/mcp.json ]; then
-    echo '{"mcpServers":{}}' > ~/.cursor/mcp.json
-fi
+# Windsurf
+curl -s https://raw.githubusercontent.com/steipete/agent-rules/refs/heads/main/global-rules/scripts/install-windsurf-mcps.sh | bash
 
-CONFIG_FILE=~/.cursor/mcp.json
-
-# Add all 9 servers (Cursor supports all transport types)
-# 1. Peekaboo
-jq --arg key "$OPENAI_KEY" '.mcpServers.peekaboo = {
-  "command": "npx",
-  "args": ["-y", "@steipete/peekaboo-mcp@beta"],
-  "env": {
-    "PEEKABOO_AI_PROVIDERS": "openai/gpt-4o,ollama/llava:latest",
-    "OPENAI_API_KEY": $key
-  }
-}' "$CONFIG_FILE" > /tmp/cursor_temp.json && mv /tmp/cursor_temp.json "$CONFIG_FILE"
-
-# 2. Context7
-jq '.mcpServers.context7 = {
-  "command": "npx",
-  "args": ["-y", "@upstash/context7-mcp@latest"]
-}' "$CONFIG_FILE" > /tmp/cursor_temp.json && mv /tmp/cursor_temp.json "$CONFIG_FILE"
-
-# 3. GitHub
-jq --arg token "$GITHUB_TOKEN" '.mcpServers.github = {
-  "command": "npx",
-  "args": ["-y", "@modelcontextprotocol/server-github"],
-  "env": {
-    "GITHUB_PERSONAL_ACCESS_TOKEN": $token
-  }
-}' "$CONFIG_FILE" > /tmp/cursor_temp.json && mv /tmp/cursor_temp.json "$CONFIG_FILE"
-
-# 4. Agent
-jq '.mcpServers.agent = {
-  "command": "npx",
-  "args": ["-y", "@steipete/claude-code-mcp@latest"]
-}' "$CONFIG_FILE" > /tmp/cursor_temp.json && mv /tmp/cursor_temp.json "$CONFIG_FILE"
-
-# 5. Automator
-jq '.mcpServers.automator = {
-  "command": "npx",
-  "args": ["-y", "@steipete/macos-automator-mcp@latest"],
-  "env": {
-    "LOG_LEVEL": "INFO"
-  }
-}' "$CONFIG_FILE" > /tmp/cursor_temp.json && mv /tmp/cursor_temp.json "$CONFIG_FILE"
-
-# 6. GitMCP
-jq '.mcpServers.gitmcp = {
-  "transport": "sse",
-  "url": "https://gitmcp.io/docs"
-}' "$CONFIG_FILE" > /tmp/cursor_temp.json && mv /tmp/cursor_temp.json "$CONFIG_FILE"
-
-# 7. Firecrawl
-jq --arg key "$FIRECRAWL_KEY" '.mcpServers["firecrawl-mcp"] = {
-  "command": "npx",
-  "args": ["-y", "firecrawl-mcp"],
-  "env": {
-    "FIRECRAWL_API_KEY": $key
-  }
-}' "$CONFIG_FILE" > /tmp/cursor_temp.json && mv /tmp/cursor_temp.json "$CONFIG_FILE"
-
-# 8. Obsidian
-jq --arg key "$OBSIDIAN_KEY" '.mcpServers["obsidian-mcp-tools"] = {
-  "command": "/Users/steipete/Documents/steipete/.obsidian/plugins/mcp-tools/bin/mcp-server",
-  "env": {
-    "OBSIDIAN_API_KEY": $key
-  }
-}' "$CONFIG_FILE" > /tmp/cursor_temp.json && mv /tmp/cursor_temp.json "$CONFIG_FILE"
-
-# 9. Playwright
-jq '.mcpServers.playwright = {
-  "command": "npx",
-  "args": ["@playwright/mcp@latest"]
-}' "$CONFIG_FILE" > /tmp/cursor_temp.json && mv /tmp/cursor_temp.json "$CONFIG_FILE"
-
-echo "✓ Cursor configuration updated (all 9 servers added)"
-```
-
-### Step 5: Install to Windsurf
-
-```bash
-# Backup first
-cp ~/.codeium/windsurf/mcp_config.json ~/.codeium/windsurf/mcp_config.json.backup 2>/dev/null || true
-
-# Create config file if it doesn't exist
-if [ ! -f ~/.codeium/windsurf/mcp_config.json ]; then
-    mkdir -p ~/.codeium/windsurf
-    echo '{"mcpServers":{}}' > ~/.codeium/windsurf/mcp_config.json
-fi
-
-CONFIG_FILE=~/.codeium/windsurf/mcp_config.json
-
-# Add all 9 servers (Windsurf supports all transport types)
-# Use same commands as Cursor but with Windsurf config file
-for i in {1..9}; do
-    # Copy the exact same jq commands from Cursor section
-    # Just change the CONFIG_FILE variable
-    echo "Adding server $i to Windsurf..."
-done
-
-# For brevity, the commands are identical to Cursor section above
-# Just replace "$CONFIG_FILE" and temp file names
-
-echo "✓ Windsurf configuration updated (all 9 servers added)"
-```
-
-### Step 6: Install to VS Code
-
-```bash
-# Backup first
-cp ~/Library/Application\ Support/Code/User/settings.json ~/Library/Application\ Support/Code/User/settings.json.backup 2>/dev/null || true
-
-# Create settings file if it doesn't exist
-if [ ! -f ~/Library/Application\ Support/Code/User/settings.json ]; then
-    mkdir -p ~/Library/Application\ Support/Code/User
-    echo '{}' > ~/Library/Application\ Support/Code/User/settings.json
-fi
-
-CONFIG_FILE=~/Library/Application\ Support/Code/User/settings.json
-
-# VS Code uses a different structure: "mcp.servers" instead of "mcpServers"
-# First ensure mcp.servers exists
-jq 'if has("mcp") then . else . + {"mcp": {"servers": {}}} end | if .mcp | has("servers") then . else .mcp.servers = {} end' "$CONFIG_FILE" > /tmp/vscode_temp.json && mv /tmp/vscode_temp.json "$CONFIG_FILE"
-
-# Add all 9 servers (VS Code supports all transport types)
-# Note the different path: .mcp.servers instead of .mcpServers
-
-# 1. Peekaboo
-jq --arg key "$OPENAI_KEY" '.mcp.servers.peekaboo = {
-  "command": "npx",
-  "args": ["-y", "@steipete/peekaboo-mcp@beta"],
-  "env": {
-    "PEEKABOO_AI_PROVIDERS": "openai/gpt-4o,ollama/llava:latest",
-    "OPENAI_API_KEY": $key
-  }
-}' "$CONFIG_FILE" > /tmp/vscode_temp.json && mv /tmp/vscode_temp.json "$CONFIG_FILE"
-
-# Continue with all other servers using .mcp.servers path...
-# (Same pattern as Cursor but with .mcp.servers prefix)
-
-echo "✓ VS Code configuration updated (all 9 servers added)"
+# VS Code
+curl -s https://raw.githubusercontent.com/steipete/agent-rules/refs/heads/main/global-rules/scripts/install-vscode-mcps.sh | bash
 ```
 
 ## Post-Installation Verification
@@ -1164,161 +773,32 @@ This will show which servers are installed in each app and highlight any configu
 
 ## Complete Installation Script
 
-For convenience, here's a complete script that performs all installations:
+For a complete installation across all applications:
 
 ```bash
-#!/bin/bash
-# Complete MCP Server Installation Script for steipete
-# This script installs all MCP servers to all supported applications
-
-set -e  # Exit on error
-
-echo "🚀 Starting MCP Server Installation for @steipete"
-echo "================================================="
-
-# Step 0: Prerequisites and API Keys
-source ~/.zshrc  # Load environment variables
-
-# Check prerequisites
-echo "Checking prerequisites..."
-command -v jq &> /dev/null || { echo "❌ jq not installed. Run: brew install jq"; exit 1; }
-command -v node &> /dev/null || { echo "❌ Node.js not installed. Install Node.js 20+"; exit 1; }
-command -v ollama &> /dev/null || { echo "⚠️  Ollama not installed. Installing..."; brew install ollama; }
-
-# Extract API keys
-OPENAI_KEY=$(grep "export OPENAI_API_KEY=" ~/.zshrc | sed 's/export OPENAI_API_KEY="//' | sed 's/"$//')
-GITHUB_TOKEN=$(grep "export GITHUB_PERSONAL_ACCESS_TOKEN=" ~/.zshrc | sed 's/export GITHUB_PERSONAL_ACCESS_TOKEN="//' | sed 's/"$//')
-FIRECRAWL_KEY=$(grep "export FIRECRAWL_API_KEY=" ~/.zshrc | sed 's/export FIRECRAWL_API_KEY="//' | sed 's/"$//')
-OBSIDIAN_KEY="f1de8ac30724ecb05988c8eb2ee9b342b15f7b91eaba3fc8b0b5280dce3aca22"  # Default key
-
-# Validate keys
-if [ -z "$OPENAI_KEY" ]; then
-    echo "⚠️  OPENAI_API_KEY not found in .zshrc - Peekaboo will have limited functionality"
-fi
-if [ -z "$GITHUB_TOKEN" ]; then
-    echo "⚠️  GITHUB_PERSONAL_ACCESS_TOKEN not found in .zshrc - GitHub MCP will not be authenticated"
-fi
-
-# Create all config directories
-mkdir -p ~/.claude ~/.cursor ~/.codeium/windsurf
-mkdir -p ~/Library/Application\ Support/Claude
-mkdir -p ~/Library/Application\ Support/Code/User
-
-# Configure Claude settings
-echo "Configuring Claude settings..."
-if [ -f ~/.claude/settings.json ]; then
-    jq '.includeCoAuthoredBy = false | .DISABLE_COST_WARNINGS = "1" | .DISABLE_AUTOUPDATER = "1"' ~/.claude/settings.json > /tmp/claude_settings_temp.json && mv /tmp/claude_settings_temp.json ~/.claude/settings.json
-else
-    echo '{
-  "model": "opus",
-  "includeCoAuthoredBy": false,
-  "DISABLE_COST_WARNINGS": "1",
-  "DISABLE_AUTOUPDATER": "1"
-}' > ~/.claude/settings.json
-fi
-
-# Install to each application
-echo "Installing MCP servers..."
-
-# 1. Claude Code (uses CLI commands)
-echo "📱 Installing to Claude Code..."
-# [Insert all claude mcp add commands here]
-
-# 2. Claude Desktop
-echo "📱 Installing to Claude Desktop..."
-# [Insert all jq commands for Claude Desktop here]
-
-# 3. Cursor
-echo "📱 Installing to Cursor..."
-# [Insert all jq commands for Cursor here]
-
-# 4. Windsurf
-echo "📱 Installing to Windsurf..."
-# [Insert all jq commands for Windsurf here]
-
-# 5. VS Code
-echo "📱 Installing to VS Code..."
-# [Insert all jq commands for VS Code here]
-
-# Verification
-echo ""
-echo "✅ Installation complete! Running verification..."
-~/Projects/agent-rules/global-rules/mcp-sync.sh
-
-echo ""
-echo "🎉 All done! Restart your applications to use the new MCP servers."
-echo ""
-echo "Remember to:"
-echo "1. Grant Screen Recording permission to Claude Desktop for Peekaboo"
-echo "2. Ensure Obsidian MCP Tools plugin is installed"
-echo "3. Pull llava:latest model for Ollama: ollama pull llava:latest"
+# Download the master installer that installs to all supported apps
+curl -s https://raw.githubusercontent.com/steipete/agent-rules/refs/heads/main/global-rules/scripts/install-all-mcps.sh | bash
 ```
 
-Save this as `install-mcps.sh` and run with:
-```bash
-chmod +x install-mcps.sh
-./install-mcps.sh
-```
+This script will:
+1. Check prerequisites (jq, Node.js, Ollama)
+2. Detect available API keys
+3. Install to Claude Code, Claude Desktop, Cursor, Windsurf, and VS Code
+4. Configure Claude settings
+5. Run verification
+
+To install everything manually, see the individual installation steps above.
 
 ## Quick Installation (Only Available Servers)
 
 For a quick installation that only installs servers with available API keys:
 
 ```bash
-#!/bin/bash
-# Quick MCP Installation - Only installs servers with available prerequisites
-
-echo "🚀 Quick MCP Server Installation"
-echo "================================"
-echo "This will only install servers that have all requirements met."
-echo ""
-
-# Check for API keys
-source ~/.zshrc
-OPENAI_KEY=$(grep "export OPENAI_API_KEY=" ~/.zshrc | sed 's/export OPENAI_API_KEY="//' | sed 's/"$//')
-GITHUB_TOKEN=$(grep "export GITHUB_PERSONAL_ACCESS_TOKEN=" ~/.zshrc | sed 's/export GITHUB_PERSONAL_ACCESS_TOKEN="//' | sed 's/"$//')
-FIRECRAWL_KEY=$(grep "export FIRECRAWL_API_KEY=" ~/.zshrc | sed 's/export FIRECRAWL_API_KEY="//' | sed 's/"$//')
-
-# Always install these (no API keys required)
-echo "Installing servers that don't require API keys..."
-claude mcp add-json -s user context7 '{"command": "npx", "args": ["-y", "@upstash/context7-mcp@latest"]}'
-claude mcp add-json -s user agent '{"command": "npx", "args": ["-y", "@steipete/claude-code-mcp@latest"]}'
-claude mcp add-json -s user automator '{"command": "npx", "args": ["-y", "@steipete/macos-automator-mcp@latest"], "env": {"LOG_LEVEL": "INFO"}}'
-claude mcp add -s user -t sse gitmcp https://gitmcp.io/docs
-claude mcp add-json -s user playwright '{"command": "npx", "args": ["@playwright/mcp@latest"]}'
-
-# Conditionally install based on available keys
-if [ -n "$OPENAI_KEY" ]; then
-    echo "Installing Peekaboo (OPENAI_API_KEY found)..."
-    claude mcp add-json -s user peekaboo "{\"command\": \"npx\", \"args\": [\"-y\", \"@steipete/peekaboo-mcp@beta\"], \"env\": {\"PEEKABOO_AI_PROVIDERS\": \"openai/gpt-4o,ollama/llava:latest\", \"OPENAI_API_KEY\": \"$OPENAI_KEY\"}}"
-fi
-
-if [ -n "$GITHUB_TOKEN" ]; then
-    echo "Installing GitHub MCP (GITHUB_PERSONAL_ACCESS_TOKEN found)..."
-    claude mcp add-json -s user github "{\"command\": \"npx\", \"args\": [\"-y\", \"@modelcontextprotocol/server-github\"], \"env\": {\"GITHUB_PERSONAL_ACCESS_TOKEN\": \"$GITHUB_TOKEN\"}}"
-fi
-
-if [ -n "$FIRECRAWL_KEY" ]; then
-    echo "Installing Firecrawl (FIRECRAWL_API_KEY found)..."
-    claude mcp add-json -s user firecrawl-mcp "{\"command\": \"npx\", \"args\": [\"-y\", \"firecrawl-mcp\"], \"env\": {\"FIRECRAWL_API_KEY\": \"$FIRECRAWL_KEY\"}}"
-fi
-
-# Check for Obsidian
-if [ -d "/Applications/Obsidian.app" ] && [ -f "/Users/steipete/Documents/steipete/.obsidian/plugins/mcp-tools/bin/mcp-server" ]; then
-    echo "Installing Obsidian MCP Tools..."
-    claude mcp add-json -s user obsidian-mcp-tools '{"command": "/Users/steipete/Documents/steipete/.obsidian/plugins/mcp-tools/bin/mcp-server", "env": {"OBSIDIAN_API_KEY": "f1de8ac30724ecb05988c8eb2ee9b342b15f7b91eaba3fc8b0b5280dce3aca22"}}'
-fi
-
-echo ""
-echo "✅ Quick installation complete!"
-echo "Run 'claude mcp list -s user' to see installed servers."
-echo ""
-echo "💡 Don't forget to install slash commands for Claude Code!"
-echo "   20 commands like /commit, /bug-fix, /pr-review"
-echo "   Run: bash install-project-rules.sh"
+# Quick install - only servers with available prerequisites
+curl -s https://raw.githubusercontent.com/steipete/agent-rules/refs/heads/main/global-rules/scripts/quick-install-mcps.sh | bash
 ```
 
-Save as `quick-install-mcps.sh` for a faster, conditional installation.
+This will check your system and only install servers that have all requirements met.
 
 ## Project Rules Installation
 
@@ -1363,65 +843,18 @@ The agent-rules repository includes 20 project rules organized by category:
 To install these project rules in your Claude Code setup:
 
 ```bash
-#!/bin/bash
-# Install Project Rules for Claude Code
-
-echo "🎯 Installing Project Rules for Claude Code"
-echo "=========================================="
-
-# Check if running from agent-rules directory
-if [ ! -d "project-rules" ]; then
-    echo "❌ Error: project-rules directory not found"
-    echo "   Please run this from the agent-rules repository root"
-    exit 1
-fi
-
-# Create Claude directory if it doesn't exist
-mkdir -p ~/.claude
-
-# Check if CLAUDE.md exists
-if [ -f ~/.claude/CLAUDE.md ]; then
-    echo "📝 Found existing ~/.claude/CLAUDE.md"
-    echo "   Adding import for project rules..."
-    
-    # Check if already imported
-    if grep -q "@.*project-rules" ~/.claude/CLAUDE.md; then
-        echo "✓ Project rules already imported"
-    else
-        # Add import at the end
-        echo "" >> ~/.claude/CLAUDE.md
-        echo "# Project Rules" >> ~/.claude/CLAUDE.md
-        echo "@$(pwd)/project-rules" >> ~/.claude/CLAUDE.md
-        echo "✓ Added project rules import"
-    fi
-else
-    echo "📝 Creating ~/.claude/CLAUDE.md with project rules import..."
-    cat > ~/.claude/CLAUDE.md << EOF
-# Claude Code User Memory
-
-This file contains personal preferences and custom commands for Claude Code.
-
-# Project Rules
-@$(pwd)/project-rules
-EOF
-    echo "✓ Created CLAUDE.md with project rules"
-fi
-
-echo ""
-echo "✅ Installation complete!"
-echo ""
-echo "Available commands in Claude Code:"
-echo "  /add-to-changelog   - Update CHANGELOG.md"
-echo "  /bug-fix           - Complete bug fix workflow"
-echo "  /commit            - Create formatted commits"
-echo "  /pr-review         - Review pull requests"
-echo "  ...and 16 more!"
-echo ""
-echo "To see all commands: ls $(pwd)/project-rules"
-echo "To use: Type '/' followed by the command name in Claude Code"
+# Clone the repository and install
+git clone https://github.com/steipete/agent-rules.git
+cd agent-rules
+bash install-project-rules.sh
 ```
 
-Save this as `install-project-rules.sh` and run it from the agent-rules repository root.
+Or if you already have the repository:
+
+```bash
+cd ~/Projects/agent-rules
+bash install-project-rules.sh
+```
 
 ### How Project Rules Work
 
