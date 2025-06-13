@@ -1,23 +1,28 @@
 # MCP Server Configuration Synchronization Rule
 
 ## Purpose
-Synchronize MCP (Model Context Protocol) server configurations across Claude Code, VS Code, Cursor, and Claude Desktop applications.
+Synchronize MCP (Model Context Protocol) server configurations across Claude Code, VS Code, Windsurf, Cursor, and Claude Desktop applications.
 
 ## Configuration File Locations
 
 ### macOS
 - **Claude Desktop**: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - **Cursor**: `~/.cursor/mcp.json`
+- **Windsurf**: `~/.codeium/windsurf/mcp_config.json`
 - **Claude Code**: `~/.claude.json` (contains more than just MCP configs)
-- **VS Code**: Per-workspace `.vscode/mcp.json` files
+- **VS Code (User)**: `~/Library/Application Support/Code/User/settings.json` (under `mcp.servers`)
 
 ### Windows
 - **Claude Desktop**: `%APPDATA%\Claude\claude_desktop_config.json`
 - **Cursor**: `%USERPROFILE%\.cursor\mcp.json`
+- **Windsurf**: `%USERPROFILE%\.codeium\windsurf\mcp_config.json`
+- **VS Code (User)**: `%APPDATA%\Code\User\settings.json` (under `mcp.servers`)
 
 ### Linux
 - **Claude Desktop**: `~/.config/Claude/claude_desktop_config.json`
 - **Cursor**: `~/.cursor/mcp.json`
+- **Windsurf**: `~/.codeium/windsurf/mcp_config.json`
+- **VS Code (User)**: `~/.config/Code/User/settings.json` (under `mcp.servers`)
 
 ## Configuration Format Differences
 

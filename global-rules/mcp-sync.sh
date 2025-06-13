@@ -15,6 +15,8 @@ NC='\033[0m' # No Color
 CLAUDE_DESKTOP_CONFIG="$HOME/Library/Application Support/Claude/claude_desktop_config.json"
 CURSOR_CONFIG="$HOME/.cursor/mcp.json"
 CLAUDE_CODE_CONFIG="$HOME/.claude.json"
+WINDSURF_CONFIG="$HOME/.codeium/windsurf/mcp_config.json"
+VSCODE_USER_CONFIG="$HOME/Library/Application Support/Code/User/settings.json"
 
 # Check if jq is installed
 if ! command -v jq &> /dev/null; then
@@ -31,7 +33,7 @@ usage() {
     echo "  -l, --list                List all MCP servers (default)"
     echo "  --to-global <server>      Switch a server from local to global config"
     echo "  --to-local <server>       Switch a server from global to local config"
-    echo "  --app <app>               Specify app for switching (claude-desktop|cursor)"
+    echo "  --app <app>               Specify app for switching (claude-desktop|cursor|windsurf|vscode)"
     echo ""
     echo "Examples:"
     echo "  $0                        # List all servers"
@@ -85,8 +87,8 @@ if [[ "$ACTION" == "to-global" || "$ACTION" == "to-local" ]]; then
         echo -e "${RED}Error: App must be specified with --app (claude-desktop or cursor)${NC}"
         usage
     fi
-    if [[ "$TARGET_APP" != "claude-desktop" && "$TARGET_APP" != "cursor" ]]; then
-        echo -e "${RED}Error: App must be either 'claude-desktop' or 'cursor'${NC}"
+    if [[ "$TARGET_APP" != "claude-desktop" && "$TARGET_APP" != "cursor" && "$TARGET_APP" != "windsurf" && "$TARGET_APP" != "vscode" ]]; then
+        echo -e "${RED}Error: App must be one of: 'claude-desktop', 'cursor', 'windsurf', or 'vscode'${NC}"
         usage
     fi
 fi
@@ -110,6 +112,10 @@ extract_servers() {
         # Extract just the mcpServers section without loading the entire file into memory
         jq -c '.mcpServers // {}' "$file" 2>/dev/null || echo "{}"
     elif [ "$format" = "vscode" ]; then
+        # VS Code stores MCP config in user settings under "mcp.servers"
+        jq -r '."mcp.servers" // {}' "$file" 2>/dev/null || echo "{}"
+    elif [ "$format" = "vscode_legacy" ]; then
+        # Legacy format for older VS Code versions
         jq -r '.mcp.servers // {}' "$file" 2>/dev/null || echo "{}"
     else
         jq -r '.mcpServers // {}' "$file" 2>/dev/null || echo "{}"
@@ -130,8 +136,12 @@ switch_to_global() {
     # Determine config file based on app
     if [[ "$app" == "claude-desktop" ]]; then
         config_file="$CLAUDE_DESKTOP_CONFIG"
-    else
+    elif [[ "$app" == "cursor" ]]; then
         config_file="$CURSOR_CONFIG"
+    elif [[ "$app" == "windsurf" ]]; then
+        config_file="$WINDSURF_CONFIG"
+    else
+        config_file="$VSCODE_USER_CONFIG"
     fi
     
     echo -e "${BLUE}Switching '$server_name' to global configuration in $app...${NC}"
@@ -213,8 +223,12 @@ switch_to_local() {
     # Determine config file based on app
     if [[ "$app" == "claude-desktop" ]]; then
         config_file="$CLAUDE_DESKTOP_CONFIG"
-    else
+    elif [[ "$app" == "cursor" ]]; then
         config_file="$CURSOR_CONFIG"
+    elif [[ "$app" == "windsurf" ]]; then
+        config_file="$WINDSURF_CONFIG"
+    else
+        config_file="$VSCODE_USER_CONFIG"
     fi
     
     echo -e "${BLUE}Switching '$server_name' to local configuration in $app...${NC}"
@@ -327,17 +341,20 @@ else
     CLAUDE_CODE_SERVERS="{}"
 fi
 
-# Find VS Code workspace configs
-echo ""
-echo "🔍 Searching for VS Code workspace configs..."
-VSCODE_CONFIGS=$(find ~ -path "*/.vscode/mcp.json" -type f 2>/dev/null | head -10)
-if [ -n "$VSCODE_CONFIGS" ]; then
-    echo -e "${GREEN}✓${NC} Found VS Code workspace configs:"
-    echo "$VSCODE_CONFIGS" | while read -r config; do
-        echo "  - $config"
-    done
+if [ -f "$WINDSURF_CONFIG" ]; then
+    echo -e "${GREEN}✓${NC} Windsurf: $WINDSURF_CONFIG"
+    WINDSURF_SERVERS=$(extract_servers "$WINDSURF_CONFIG" "standard")
 else
-    echo -e "${YELLOW}⚠${NC} No VS Code workspace configs found"
+    echo -e "${RED}✗${NC} Windsurf: Not found"
+    WINDSURF_SERVERS="{}"
+fi
+
+if [ -f "$VSCODE_USER_CONFIG" ]; then
+    echo -e "${GREEN}✓${NC} VS Code (User): $VSCODE_USER_CONFIG"
+    VSCODE_SERVERS=$(extract_servers "$VSCODE_USER_CONFIG" "vscode")
+else
+    echo -e "${RED}✗${NC} VS Code (User): Not found"
+    VSCODE_SERVERS="{}"
 fi
 
 echo ""
@@ -345,7 +362,7 @@ echo "📊 Server Analysis:"
 echo "=================="
 
 # Get all unique server names
-ALL_SERVERS=$(echo "$CLAUDE_DESKTOP_SERVERS $CURSOR_SERVERS $CLAUDE_CODE_SERVERS" | \
+ALL_SERVERS=$(echo "$CLAUDE_DESKTOP_SERVERS $CURSOR_SERVERS $CLAUDE_CODE_SERVERS $WINDSURF_SERVERS $VSCODE_SERVERS" | \
     jq -s 'add | keys' | jq -r '.[]' | sort -u)
 
 # Create arrays for tracking
@@ -353,17 +370,23 @@ declare -a COMMON_SERVERS=()
 declare -a CLAUDE_DESKTOP_ONLY=()
 declare -a CURSOR_ONLY=()
 declare -a CLAUDE_CODE_ONLY=()
+declare -a WINDSURF_ONLY=()
+declare -a VSCODE_ONLY=()
 
 # Analyze each server
 for server in $ALL_SERVERS; do
     in_claude_desktop=$(echo "$CLAUDE_DESKTOP_SERVERS" | jq --arg s "$server" 'has($s)')
     in_cursor=$(echo "$CURSOR_SERVERS" | jq --arg s "$server" 'has($s)')
     in_claude_code=$(echo "$CLAUDE_CODE_SERVERS" | jq --arg s "$server" 'has($s)')
+    in_windsurf=$(echo "$WINDSURF_SERVERS" | jq --arg s "$server" 'has($s)')
+    in_vscode=$(echo "$VSCODE_SERVERS" | jq --arg s "$server" 'has($s)')
     
     count=0
     [ "$in_claude_desktop" = "true" ] && ((count++))
     [ "$in_cursor" = "true" ] && ((count++))
     [ "$in_claude_code" = "true" ] && ((count++))
+    [ "$in_windsurf" = "true" ] && ((count++))
+    [ "$in_vscode" = "true" ] && ((count++))
     
     if [ $count -ge 2 ]; then
         COMMON_SERVERS+=("$server")
@@ -373,6 +396,10 @@ for server in $ALL_SERVERS; do
         CURSOR_ONLY+=("$server")
     elif [ "$in_claude_code" = "true" ] && [ $count -eq 1 ]; then
         CLAUDE_CODE_ONLY+=("$server")
+    elif [ "$in_windsurf" = "true" ] && [ $count -eq 1 ]; then
+        WINDSURF_ONLY+=("$server")
+    elif [ "$in_vscode" = "true" ] && [ $count -eq 1 ]; then
+        VSCODE_ONLY+=("$server")
     fi
 done
 
@@ -383,13 +410,34 @@ if [ ${#COMMON_SERVERS[@]} -eq 0 ]; then
     echo "  None"
 else
     for server in "${COMMON_SERVERS[@]}"; do
-        echo -e "  ${GREEN}•${NC} $server"
+        # Get package/URL info from first available config
+        server_info=""
+        for servers in "$CLAUDE_DESKTOP_SERVERS" "$CURSOR_SERVERS" "$WINDSURF_SERVERS" "$VSCODE_SERVERS"; do
+            config=$(echo "$servers" | jq --arg s "$server" '.[$s]' 2>/dev/null)
+            if [ "$config" != "null" ] && [ -n "$config" ]; then
+                # Extract package name or URL
+                if echo "$config" | jq -e '.url' >/dev/null 2>&1; then
+                    server_info=$(echo "$config" | jq -r '.url')
+                elif echo "$config" | jq -e '.args' >/dev/null 2>&1; then
+                    # Look for package name in args, skip -y flag
+                    pkg=$(echo "$config" | jq -r '.args[]' | grep -v '^-y$' | grep -E '^@|^[a-z-]+$' | grep -v '^-' | head -1)
+                    [ -n "$pkg" ] && server_info="$pkg"
+                else
+                    server_info=$(echo "$config" | jq -r '.command' | head -1)
+                fi
+                [ -n "$server_info" ] && break
+            fi
+        done
+        
+        echo -e "  ${GREEN}•${NC} $server ($server_info)"
         
         # Show which apps have it
         apps=""
         [ "$(echo "$CLAUDE_DESKTOP_SERVERS" | jq --arg s "$server" 'has($s)')" = "true" ] && apps+="Claude Desktop, "
         [ "$(echo "$CURSOR_SERVERS" | jq --arg s "$server" 'has($s)')" = "true" ] && apps+="Cursor, "
         [ "$(echo "$CLAUDE_CODE_SERVERS" | jq --arg s "$server" 'has($s)')" = "true" ] && apps+="Claude Code, "
+        [ "$(echo "$WINDSURF_SERVERS" | jq --arg s "$server" 'has($s)')" = "true" ] && apps+="Windsurf, "
+        [ "$(echo "$VSCODE_SERVERS" | jq --arg s "$server" 'has($s)')" = "true" ] && apps+="VS Code, "
         apps=${apps%, }
         echo "    In: $apps"
     done
@@ -401,14 +449,34 @@ echo "📱 App-Specific Servers:"
 if [ ${#CLAUDE_DESKTOP_ONLY[@]} -gt 0 ]; then
     echo -e "\n  ${YELLOW}Claude Desktop only:${NC}"
     for server in "${CLAUDE_DESKTOP_ONLY[@]}"; do
-        echo "  • $server"
+        config=$(echo "$CLAUDE_DESKTOP_SERVERS" | jq --arg s "$server" '.[$s]' 2>/dev/null)
+        server_info=""
+        if echo "$config" | jq -e '.url' >/dev/null 2>&1; then
+            server_info=$(echo "$config" | jq -r '.url')
+        elif echo "$config" | jq -e '.args' >/dev/null 2>&1; then
+            pkg=$(echo "$config" | jq -r '.args[]' | grep -v '^-y$' | grep -E '^@|^[a-z-]+$' | grep -v '^-' | head -1)
+            [ -n "$pkg" ] && server_info="$pkg"
+        else
+            server_info=$(echo "$config" | jq -r '.command' | head -1)
+        fi
+        echo "  • $server ($server_info)"
     done
 fi
 
 if [ ${#CURSOR_ONLY[@]} -gt 0 ]; then
     echo -e "\n  ${YELLOW}Cursor only:${NC}"
     for server in "${CURSOR_ONLY[@]}"; do
-        echo "  • $server"
+        config=$(echo "$CURSOR_SERVERS" | jq --arg s "$server" '.[$s]' 2>/dev/null)
+        server_info=""
+        if echo "$config" | jq -e '.url' >/dev/null 2>&1; then
+            server_info=$(echo "$config" | jq -r '.url')
+        elif echo "$config" | jq -e '.args' >/dev/null 2>&1; then
+            pkg=$(echo "$config" | jq -r '.args[]' | grep -v '^-y$' | grep -E '^@|^[a-z-]+$' | grep -v '^-' | head -1)
+            [ -n "$pkg" ] && server_info="$pkg"
+        else
+            server_info=$(echo "$config" | jq -r '.command' | head -1)
+        fi
+        echo "  • $server ($server_info)"
     done
 fi
 
@@ -419,51 +487,143 @@ if [ ${#CLAUDE_CODE_ONLY[@]} -gt 0 ]; then
     done
 fi
 
+if [ ${#WINDSURF_ONLY[@]} -gt 0 ]; then
+    echo -e "\n  ${YELLOW}Windsurf only:${NC}"
+    for server in "${WINDSURF_ONLY[@]}"; do
+        config=$(echo "$WINDSURF_SERVERS" | jq --arg s "$server" '.[$s]' 2>/dev/null)
+        server_info=""
+        if echo "$config" | jq -e '.url' >/dev/null 2>&1; then
+            server_info=$(echo "$config" | jq -r '.url')
+        elif echo "$config" | jq -e '.args' >/dev/null 2>&1; then
+            pkg=$(echo "$config" | jq -r '.args[]' | grep -v '^-y$' | grep -E '^@|^[a-z-]+$' | grep -v '^-' | head -1)
+            [ -n "$pkg" ] && server_info="$pkg"
+        else
+            server_info=$(echo "$config" | jq -r '.command' | head -1)
+        fi
+        echo "  • $server ($server_info)"
+    done
+fi
+
+if [ ${#VSCODE_ONLY[@]} -gt 0 ]; then
+    echo -e "\n  ${YELLOW}VS Code only:${NC}"
+    for server in "${VSCODE_ONLY[@]}"; do
+        config=$(echo "$VSCODE_SERVERS" | jq --arg s "$server" '.[$s]' 2>/dev/null)
+        server_info=""
+        if echo "$config" | jq -e '.url' >/dev/null 2>&1; then
+            server_info=$(echo "$config" | jq -r '.url')
+        elif echo "$config" | jq -e '.args' >/dev/null 2>&1; then
+            pkg=$(echo "$config" | jq -r '.args[]' | grep -v '^-y$' | grep -E '^@|^[a-z-]+$' | grep -v '^-' | head -1)
+            [ -n "$pkg" ] && server_info="$pkg"
+        else
+            server_info=$(echo "$config" | jq -r '.command' | head -1)
+        fi
+        echo "  • $server ($server_info)"
+    done
+fi
+
 # Configuration differences for common servers
 echo ""
-echo "🔧 Configuration Differences:"
-echo "============================"
+echo "🔧 Configuration Status:"
+echo "======================="
 
+# First, show servers with matching configs
+echo ""
+echo "✅ Shared across all apps (matching configs):"
+matching_found=false
 for server in "${COMMON_SERVERS[@]}"; do
-    echo ""
-    echo "Server: $server"
-    echo "---------------"
-    
     # Get configurations from each app
     claude_desktop_config=$(echo "$CLAUDE_DESKTOP_SERVERS" | jq --arg s "$server" '.[$s]' 2>/dev/null)
     cursor_config=$(echo "$CURSOR_SERVERS" | jq --arg s "$server" '.[$s]' 2>/dev/null)
-    claude_code_config=$(echo "$CLAUDE_CODE_SERVERS" | jq --arg s "$server" '.[$s]' 2>/dev/null)
+    windsurf_config=$(echo "$WINDSURF_SERVERS" | jq --arg s "$server" '.[$s]' 2>/dev/null)
+    vscode_config=$(echo "$VSCODE_SERVERS" | jq --arg s "$server" '.[$s]' 2>/dev/null)
     
-    # Compare configurations
-    configs_match=true
-    
-    if [ "$claude_desktop_config" != "null" ] && [ "$cursor_config" != "null" ]; then
-        if [ "$claude_desktop_config" != "$cursor_config" ]; then
-            configs_match=false
-        fi
+    # Get the command/package info for display
+    config_cmd=""
+    if [ "$claude_desktop_config" != "null" ]; then
+        config_cmd=$(echo "$claude_desktop_config" | jq -r 'if .args then (.args | map(select(. != "-y")) | join(" ")) else .command end' 2>/dev/null)
+    elif [ "$cursor_config" != "null" ]; then
+        config_cmd=$(echo "$cursor_config" | jq -r 'if .args then (.args | map(select(. != "-y")) | join(" ")) else .command end' 2>/dev/null)
     fi
     
+    # Check if all non-null configs match
+    configs_match=true
+    first_config=""
+    for config in "$claude_desktop_config" "$cursor_config" "$windsurf_config" "$vscode_config"; do
+        if [ "$config" != "null" ]; then
+            if [ -z "$first_config" ]; then
+                first_config="$config"
+            elif [ "$config" != "$first_config" ]; then
+                configs_match=false
+                break
+            fi
+        fi
+    done
+    
     if [ "$configs_match" = true ]; then
-        echo -e "  ${GREEN}✓${NC} Configurations match across apps"
-    else
-        echo -e "  ${RED}✗${NC} Configurations differ:"
+        matching_found=true
+        echo -e "  ${GREEN}✓${NC} $server: $config_cmd"
+    fi
+done
+
+if [ "$matching_found" = false ]; then
+    echo "  None"
+fi
+
+# Then show servers with differing configs
+echo ""
+echo "⚠️  Configuration differences:"
+diff_found=false
+for server in "${COMMON_SERVERS[@]}"; do
+    # Get configurations from each app
+    claude_desktop_config=$(echo "$CLAUDE_DESKTOP_SERVERS" | jq --arg s "$server" '.[$s]' 2>/dev/null)
+    cursor_config=$(echo "$CURSOR_SERVERS" | jq --arg s "$server" '.[$s]' 2>/dev/null)
+    windsurf_config=$(echo "$WINDSURF_SERVERS" | jq --arg s "$server" '.[$s]' 2>/dev/null)
+    vscode_config=$(echo "$VSCODE_SERVERS" | jq --arg s "$server" '.[$s]' 2>/dev/null)
+    
+    # Check if all non-null configs match
+    configs_match=true
+    first_config=""
+    for config in "$claude_desktop_config" "$cursor_config" "$windsurf_config" "$vscode_config"; do
+        if [ "$config" != "null" ]; then
+            if [ -z "$first_config" ]; then
+                first_config="$config"
+            elif [ "$config" != "$first_config" ]; then
+                configs_match=false
+                break
+            fi
+        fi
+    done
+    
+    if [ "$configs_match" = false ]; then
+        diff_found=true
+        echo ""
+        echo -e "  ${RED}✗${NC} $server:"
         
         if [ "$claude_desktop_config" != "null" ]; then
-            echo "    Claude Desktop:"
-            echo "$claude_desktop_config" | jq . | sed 's/^/      /'
+            cmd=$(echo "$claude_desktop_config" | jq -r 'if .args then (.args | map(select(. != "-y")) | join(" ")) else .command end' 2>/dev/null)
+            echo "    • Claude Desktop: $cmd"
         fi
         
         if [ "$cursor_config" != "null" ] && [ "$cursor_config" != "$claude_desktop_config" ]; then
-            echo "    Cursor:"
-            echo "$cursor_config" | jq . | sed 's/^/      /'
+            cmd=$(echo "$cursor_config" | jq -r 'if .args then (.args | map(select(. != "-y")) | join(" ")) else .command end' 2>/dev/null)
+            echo "    • Cursor: $cmd"
         fi
         
-        if [ "$claude_code_config" != "null" ] && [ "$claude_code_config" != "$claude_desktop_config" ] && [ "$claude_code_config" != "$cursor_config" ]; then
-            echo "    Claude Code:"
-            echo "$claude_code_config" | jq . | sed 's/^/      /'
+        if [ "$windsurf_config" != "null" ] && [ "$windsurf_config" != "$claude_desktop_config" ] && [ "$windsurf_config" != "$cursor_config" ]; then
+            cmd=$(echo "$windsurf_config" | jq -r 'if .args then (.args | map(select(. != "-y")) | join(" ")) else .command end' 2>/dev/null)
+            echo "    • Windsurf: $cmd"
+        fi
+        
+        if [ "$vscode_config" != "null" ] && [ "$vscode_config" != "$claude_desktop_config" ] && [ "$vscode_config" != "$cursor_config" ] && [ "$vscode_config" != "$windsurf_config" ]; then
+            cmd=$(echo "$vscode_config" | jq -r 'if .args then (.args | map(select(. != "-y")) | join(" ")) else .command end' 2>/dev/null)
+            echo "    • VS Code: $cmd"
         fi
     fi
 done
+
+if [ "$diff_found" = false ]; then
+    echo "  None"
+fi
 
 # Summary
 echo ""
@@ -483,7 +643,7 @@ if [ ${#COMMON_SERVERS[@]} -gt 0 ]; then
     echo "• Review configuration differences for common servers"
 fi
 
-total_unique=$((${#CLAUDE_DESKTOP_ONLY[@]} + ${#CURSOR_ONLY[@]} + ${#CLAUDE_CODE_ONLY[@]}))
+total_unique=$((${#CLAUDE_DESKTOP_ONLY[@]} + ${#CURSOR_ONLY[@]} + ${#CLAUDE_CODE_ONLY[@]} + ${#WINDSURF_ONLY[@]} + ${#VSCODE_ONLY[@]}))
 if [ $total_unique -gt 0 ]; then
     echo "• Consider adding app-specific servers to other apps for consistency"
 fi
