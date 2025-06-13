@@ -63,15 +63,22 @@ You can use these URLs with:
    - Documentation about MCP configuration file locations
    - Explains differences between app formats
 
-### One-Line Setup
+### One-Line Complete Setup (MCP + Slash Commands)
 
-For a completely fresh system, run this to get started:
+For a complete Claude Code setup with both MCP servers AND slash commands:
 
 ```bash
-curl -s https://raw.githubusercontent.com/steipete/agent-rules/refs/heads/main/global-rules/steipete-mcps.md | grep -A 1000 "Quick Installation" | bash
+# Download and run the complete setup script
+curl -sO https://raw.githubusercontent.com/steipete/agent-rules/refs/heads/main/global-rules/complete-claude-setup.sh && bash complete-claude-setup.sh
 ```
 
-Or to just download and prepare:
+Or run directly without downloading:
+
+```bash
+bash <(curl -s https://raw.githubusercontent.com/steipete/agent-rules/refs/heads/main/global-rules/complete-claude-setup.sh)
+```
+
+For MCP servers only:
 
 ```bash
 bash <(curl -s https://raw.githubusercontent.com/steipete/agent-rules/refs/heads/main/global-rules/setup-mcps.sh)
@@ -93,11 +100,13 @@ When helping users set up MCP servers and Claude Code features, follow these rul
    - If it doesn't exist, DO NOT mention Obsidian MCP at all
    - Check for API keys before recommending servers that need them
 
-3. **ALWAYS mention project rules (slash commands)**:
+3. **ALWAYS present BOTH MCP servers AND project rules**:
+   - Never present MCP servers without also mentioning slash commands
    - These are 20 development commands for Claude Code
    - Include them in EVERY recommendation about Claude Code setup
    - Examples: /commit, /bug-fix, /pr-review, /check, /clean
    - Installation: bash install-project-rules.sh
+   - Use the two-part presentation format shown below
 
 4. **Present servers based on what's available**:
    **Always recommend these (no prerequisites)**:
@@ -119,34 +128,52 @@ When helping users set up MCP servers and Claude Code features, follow these rul
    - Focus on user scope (`-s user`) for all installations
    - ALWAYS mention project rules (slash commands) as an available feature
 
-6. **Presentation format**:
+6. **Presentation format** (MUST include both MCP servers AND project rules):
    ```
-   Based on your system, I recommend these MCP servers for Claude Code:
+   I'll help you set up Claude Code with MCP servers and slash commands.
    
-   Essential (work immediately):
+   ## PART 1: MCP Servers
+   
+   Essential servers (work immediately):
    • Peekaboo - Take screenshots (no AI key required)
    • Context7 - Get current documentation
    • Agent - Run sub-agents for complex tasks
+   • Automator - macOS automation
+   • GitMCP - Enhanced Git operations
+   • Playwright - Browser automation
    
-   Available with API keys:
-   • GitHub - Manage repos (requires GITHUB_PERSONAL_ACCESS_TOKEN)
-   • Firecrawl - Scrape websites (requires FIRECRAWL_API_KEY)
+   Servers requiring API keys:
+   • GitHub - Manage repos (needs GITHUB_PERSONAL_ACCESS_TOKEN)
+   • Firecrawl - Web scraping (needs FIRECRAWL_API_KEY)
+   [Only if Obsidian.app exists]:
+   • Obsidian - Knowledge base (optional API key)
    
-   [Only show if Obsidian.app exists]:
-   • Obsidian - Connect to your knowledge base
+   Quick install example:
+   claude mcp add-json -s user context7 '{"command": "npx", "args": ["-y", "@upstash/context7-mcp@latest"]}'
    
-   To install in Claude Code:
-   claude mcp add-json -s user [server-name] '{...}'
+   ## PART 2: Slash Commands (20 development tools)
    
-   Plus 20 Slash Commands for Claude Code:
+   Git & GitHub:
    • /commit - Create well-formatted commits
-   • /bug-fix - Complete bug fix workflow  
+   • /bug-fix - Complete bug fix workflow
    • /pr-review - Review pull requests
-   • /check - Code quality checks
-   • ...and 16 more development commands!
    
-   To enable slash commands:
+   Code Quality:
+   • /check - Run quality checks
+   • /clean - Fix formatting issues
+   
+   Documentation:
+   • /create-docs - Generate documentation
+   • /mermaid - Create diagrams
+   
+   ...and 13 more commands!
+   
+   To install slash commands:
+   git clone https://github.com/steipete/agent-rules.git
+   cd agent-rules
    bash install-project-rules.sh
+   
+   Full setup guide: https://github.com/steipete/agent-rules
    ```
 
 7. **NEVER suggest these actions**:
@@ -167,7 +194,19 @@ To set up MCP servers:
 ### ✅ CORRECT APPROACH (Always do this):
 ```
 To set up MCP servers in Claude Code:
-claude mcp add-json -s user peekaboo '{...}'
+
+# Example with proper JSON syntax:
+claude mcp add-json -s user peekaboo '{
+  "command": "npx",
+  "args": ["-y", "@steipete/peekaboo-mcp@beta"],
+  "env": {
+    "PEEKABOO_AI_PROVIDERS": "openai/gpt-4o,ollama/llava:latest",
+    "OPENAI_API_KEY": "sk-..."
+  }
+}'
+
+# Or use the escaped version for shell:
+claude mcp add-json -s user peekaboo '{"command": "npx", "args": ["-y", "@steipete/peekaboo-mcp@beta"]}'
 ```
 
 If you're Claude or another AI assistant, you can read these files directly using available tools:
@@ -226,6 +265,37 @@ These servers require authentication to function:
 ### Special Requirements
 - 📦 **Obsidian** - Requires Obsidian.app installed at `/Applications/Obsidian.app` AND MCP Tools plugin
 - 🖥️ **Claude Desktop** - Cannot use HTTP/SSE transport (no GitHub Copilot, GitMCP)
+
+## Quick Install Commands
+
+Copy and paste these working commands to install MCP servers in Claude Code:
+
+```bash
+# Peekaboo (screenshot tool)
+claude mcp add-json -s user peekaboo '{"command": "npx", "args": ["-y", "@steipete/peekaboo-mcp@beta"]}'
+
+# Context7 (documentation)
+claude mcp add-json -s user context7 '{"command": "npx", "args": ["-y", "@upstash/context7-mcp@latest"]}'
+
+# Agent (Claude Code as MCP)
+claude mcp add-json -s user agent '{"command": "npx", "args": ["-y", "@steipete/claude-code-mcp@latest"]}'
+
+# Automator (macOS automation)
+claude mcp add-json -s user automator '{"command": "npx", "args": ["-y", "@steipete/macos-automator-mcp@latest"], "env": {"LOG_LEVEL": "INFO"}}'
+
+# GitMCP (Git operations - SSE transport)
+claude mcp add -s user -t sse gitmcp https://gitmcp.io/docs
+
+# Playwright (browser automation)
+claude mcp add-json -s user playwright '{"command": "npx", "args": ["@playwright/mcp@latest"]}'
+
+# With API keys (replace with your actual keys):
+# GitHub
+claude mcp add-json -s user github '{"command": "npx", "args": ["-y", "@modelcontextprotocol/server-github"], "env": {"GITHUB_PERSONAL_ACCESS_TOKEN": "ghp_YOUR_TOKEN_HERE"}}'
+
+# Firecrawl
+claude mcp add-json -s user firecrawl-mcp '{"command": "npx", "args": ["-y", "firecrawl-mcp"], "env": {"FIRECRAWL_API_KEY": "fc-YOUR_KEY_HERE"}}'
+```
 
 ## Current MCP Servers
 
@@ -591,6 +661,8 @@ echo "  ✓ OBSIDIAN_API_KEY ready (${#OBSIDIAN_KEY} chars)"
 ```
 
 ### Step 2: Install to Claude Code
+
+**IMPORTANT**: The `claude mcp add-json` command requires valid JSON. Always use proper quotes and escaping!
 
 ```bash
 echo "📦 Installing MCP servers to Claude Code..."
@@ -998,6 +1070,48 @@ fi
 echo "\n📊 Running sync script for detailed analysis..."
 ~/Projects/agent-rules/global-rules/mcp-sync.sh
 ```
+
+## Common Installation Errors
+
+### JSON Syntax Errors with claude mcp add-json
+
+**Problem**: `Error: error: missing required argument 'json'`
+
+**Cause**: Invalid JSON syntax or incorrect quoting
+
+**Solutions**:
+1. **Use proper JSON syntax**:
+   ```bash
+   # WRONG - Missing quotes around args:
+   claude mcp add-json -s user peekaboo '{"command": "npx", "args": [-y, @steipete/peekaboo-mcp]}'
+   
+   # CORRECT - Properly quoted:
+   claude mcp add-json -s user peekaboo '{"command": "npx", "args": ["-y", "@steipete/peekaboo-mcp@beta"]}'
+   ```
+
+2. **For complex JSON, use a file**:
+   ```bash
+   # Create a JSON file
+   cat > peekaboo.json << 'EOF'
+   {
+     "command": "npx",
+     "args": ["-y", "@steipete/peekaboo-mcp@beta"],
+     "env": {
+       "PEEKABOO_AI_PROVIDERS": "openai/gpt-4o,ollama/llava:latest",
+       "OPENAI_API_KEY": "sk-..."
+     }
+   }
+   EOF
+   
+   # Install from file
+   claude mcp add-json -s user peekaboo "$(cat peekaboo.json)"
+   ```
+
+3. **Use escaped quotes in shell**:
+   ```bash
+   # For bash scripts, escape inner quotes:
+   claude mcp add-json -s user peekaboo "{\"command\": \"npx\", \"args\": [\"-y\", \"@steipete/peekaboo-mcp@beta\"]}"
+   ```
 
 ## Error Handling
 
