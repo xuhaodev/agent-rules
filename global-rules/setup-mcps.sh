@@ -54,6 +54,32 @@ echo "2. Quick install:      ./quick-install-mcps.sh"
 echo "3. Full install:       Follow instructions in steipete-mcps.md"
 echo "4. Verify setup:       ./mcp-sync.sh"
 echo ""
+
+# Offer to install project rules
+echo "📋 Project Rules (Slash Commands)"
+echo "================================="
+echo "The repository includes 20 project rules that add slash commands to Claude Code:"
+echo "  • /commit - Create well-formatted commits"
+echo "  • /bug-fix - Complete bug fix workflow"
+echo "  • /pr-review - Comprehensive PR reviews"
+echo "  • ...and 17 more!"
+echo ""
+read -p "Would you like to install project rules? (y/N): " install_rules
+if [[ "$install_rules" == "y" || "$install_rules" == "Y" ]]; then
+    # Check if we have the full repository
+    if [ -d "$HOME/Projects/agent-rules/project-rules" ]; then
+        cd "$HOME/Projects/agent-rules"
+        ./install-project-rules.sh
+    else
+        echo "Cloning full repository to get project rules..."
+        git clone https://github.com/steipete/agent-rules.git ~/Projects/agent-rules-full
+        cd ~/Projects/agent-rules-full
+        ./install-project-rules.sh
+    fi
+    cd ~/Projects/agent-rules/global-rules
+fi
+
+echo ""
 echo "To view the documentation:"
 echo "  cat steipete-mcps.md"
 echo ""

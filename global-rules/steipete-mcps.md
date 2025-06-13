@@ -1111,6 +1111,282 @@ echo "Run 'claude mcp list -s user' to see installed servers."
 
 Save as `quick-install-mcps.sh` for a faster, conditional installation.
 
+## Project Rules Installation
+
+Claude Code supports project rules - custom slash commands that help automate common development tasks. These are stored as `.mdc` files and can be invoked using `/command` syntax.
+
+### Available Project Rules
+
+The agent-rules repository includes 20 project rules organized by category:
+
+**Git & GitHub:**
+• **/commit** - Create well-formatted commits with conventional commit messages and emojis
+• **/commit-fast** - Generate 3 commit message suggestions and auto-use the first one  
+• **/bug-fix** - Streamline bug fixing workflow from issue creation to pull request
+• **/pr-review** - Comprehensive pull request review from multiple perspectives
+• **/analyze-issue** - Fetch GitHub issue details and create implementation specification
+
+**Code Quality:**
+• **/check** - Perform comprehensive code quality and security checks
+• **/clean** - Fix all code formatting and quality issues in the entire codebase  
+• **/code-analysis** - Perform advanced code analysis with multiple inspection options
+
+**Documentation:**
+• **/add-to-changelog** - Update the project's CHANGELOG.md file with a new entry
+• **/create-docs** - Create comprehensive documentation for components or features
+• **/mermaid** - Generate Mermaid diagrams for visualizing code structure
+
+**Development Workflow:**
+• **/implement-task** - Approach task implementation methodically with planning
+• **/context-prime** - Prime Claude with comprehensive project understanding
+• **/five** - Use Five Whys root cause analysis to understand problems
+
+**Automation & Meta:**
+• **/create-command** - Guide for creating new custom Claude commands
+• **/continuous-improvement** - Systematic approach for improving AI assistant rules
+• **/safari-automation** - Automating Safari interactions for web UI testing  
+• **/screenshot-automation** - AppleScript patterns for automated screenshots
+• **/cursor-rules-meta-guide** - Meta guide for creating and maintaining cursor rules
+• **/mcp-inspector-debugging** - Debug MCP servers using the MCP Inspector tool
+
+### Installing Project Rules
+
+To install these project rules in your Claude Code setup:
+
+```bash
+#!/bin/bash
+# Install Project Rules for Claude Code
+
+echo "🎯 Installing Project Rules for Claude Code"
+echo "=========================================="
+
+# Check if running from agent-rules directory
+if [ ! -d "project-rules" ]; then
+    echo "❌ Error: project-rules directory not found"
+    echo "   Please run this from the agent-rules repository root"
+    exit 1
+fi
+
+# Create Claude directory if it doesn't exist
+mkdir -p ~/.claude
+
+# Check if CLAUDE.md exists
+if [ -f ~/.claude/CLAUDE.md ]; then
+    echo "📝 Found existing ~/.claude/CLAUDE.md"
+    echo "   Adding import for project rules..."
+    
+    # Check if already imported
+    if grep -q "@.*project-rules" ~/.claude/CLAUDE.md; then
+        echo "✓ Project rules already imported"
+    else
+        # Add import at the end
+        echo "" >> ~/.claude/CLAUDE.md
+        echo "# Project Rules" >> ~/.claude/CLAUDE.md
+        echo "@$(pwd)/project-rules" >> ~/.claude/CLAUDE.md
+        echo "✓ Added project rules import"
+    fi
+else
+    echo "📝 Creating ~/.claude/CLAUDE.md with project rules import..."
+    cat > ~/.claude/CLAUDE.md << EOF
+# Claude Code User Memory
+
+This file contains personal preferences and custom commands for Claude Code.
+
+# Project Rules
+@$(pwd)/project-rules
+EOF
+    echo "✓ Created CLAUDE.md with project rules"
+fi
+
+echo ""
+echo "✅ Installation complete!"
+echo ""
+echo "Available commands in Claude Code:"
+echo "  /add-to-changelog   - Update CHANGELOG.md"
+echo "  /bug-fix           - Complete bug fix workflow"
+echo "  /commit            - Create formatted commits"
+echo "  /pr-review         - Review pull requests"
+echo "  ...and 16 more!"
+echo ""
+echo "To see all commands: ls $(pwd)/project-rules"
+echo "To use: Type '/' followed by the command name in Claude Code"
+```
+
+Save this as `install-project-rules.sh` and run it from the agent-rules repository root.
+
+### How Project Rules Work
+
+1. **Storage**: Rules are stored as `.mdc` files in a directory
+2. **Import**: The directory is imported via `@path/to/rules` in CLAUDE.md
+3. **Usage**: Type `/command-name` in Claude Code to invoke
+4. **Context**: Claude loads the rule content and follows its instructions
+5. **Chaining**: Rules can reference other rules or memories
+
+### Creating Custom Rules
+
+To create your own project rule:
+
+1. Create a new `.mdc` file in the project-rules directory
+2. Use the `/create-command` rule as a template
+3. Include clear instructions and examples
+4. Test in Claude Code
+
+### Quick Setup Option
+
+Add to the main installation script:
+
+```bash
+# At the end of the MCP installation script
+echo ""
+read -p "Would you like to install project rules (slash commands)? (y/N): " install_rules
+if [[ "$install_rules" == "y" || "$install_rules" == "Y" ]]; then
+    if [ -d "$(dirname "$0")/../project-rules" ]; then
+        cd "$(dirname "$0")/.."
+        bash install-project-rules.sh
+    else
+        echo "Project rules not found. Clone the full repository:"
+        echo "git clone https://github.com/steipete/agent-rules.git"
+    fi
+fi
+```
+
+## Customization & Tweaks
+
+### Adding/Removing MCP Servers
+
+To add or remove specific MCP servers after installation:
+
+```bash
+# Add a server
+claude mcp add-json -s user server-name '{"command": "npx", "args": ["package-name"]}'
+
+# Remove a server
+claude mcp remove -s user server-name
+
+# List all servers
+claude mcp list
+```
+
+### Adding/Removing Project Rules
+
+Project rules are managed through the CLAUDE.md import. To customize:
+
+```bash
+# Remove project rules
+sed -i '' '/@.*project-rules/d' ~/.claude/CLAUDE.md
+
+# Re-add project rules
+echo "@/Users/steipete/Projects/agent-rules/project-rules" >> ~/.claude/CLAUDE.md
+
+# Add specific rules only
+mkdir ~/my-rules
+cp /Users/steipete/Projects/agent-rules/project-rules/{commit,bug-fix,pr-review}.mdc ~/my-rules/
+echo "@$HOME/my-rules" >> ~/.claude/CLAUDE.md
+```
+
+### Quick Tweaks Script
+
+For easy customization after installation:
+
+```bash
+#!/bin/bash
+# MCP and Project Rules Tweaker
+
+echo "🔧 MCP & Project Rules Customization"
+echo "===================================="
+echo ""
+echo "What would you like to do?"
+echo "1. Add/Remove MCP servers"
+echo "2. Add/Remove project rules" 
+echo "3. Update API keys"
+echo "4. Show current configuration"
+echo "5. Exit"
+echo ""
+read -p "Choose an option (1-5): " choice
+
+case $choice in
+    1)
+        echo ""
+        echo "MCP Server Management:"
+        echo "a. Add Peekaboo (screenshot tool)"
+        echo "b. Add GitHub (API access)"
+        echo "c. Add Firecrawl (web scraping)"
+        echo "d. Remove a server"
+        echo "e. List all servers"
+        read -p "Choose: " mcp_choice
+        
+        case $mcp_choice in
+            a) claude mcp add-json -s user peekaboo '{"command": "npx", "args": ["-y", "@steipete/peekaboo-mcp@beta"]}' ;;
+            b) echo "Add GITHUB_PERSONAL_ACCESS_TOKEN to ~/.zshrc first!" ;;
+            c) echo "Add FIRECRAWL_API_KEY to ~/.zshrc first!" ;;
+            d) read -p "Server name to remove: " name && claude mcp remove -s user "$name" ;;
+            e) claude mcp list ;;
+        esac
+        ;;
+    2)
+        echo ""
+        echo "Project Rules Management:"
+        echo "a. Install all project rules"
+        echo "b. Remove all project rules"
+        echo "c. Install specific categories only"
+        read -p "Choose: " rules_choice
+        
+        case $rules_choice in
+            a) 
+                if ! grep -q "@.*project-rules" ~/.claude/CLAUDE.md; then
+                    echo "@/Users/steipete/Projects/agent-rules/project-rules" >> ~/.claude/CLAUDE.md
+                    echo "✓ Added all project rules"
+                else
+                    echo "Project rules already installed"
+                fi
+                ;;
+            b)
+                sed -i '' '/@.*project-rules/d' ~/.claude/CLAUDE.md
+                echo "✓ Removed project rules"
+                ;;
+            c)
+                echo "Choose categories:"
+                echo "1. Git & GitHub (/commit, /bug-fix, /pr-review)"
+                echo "2. Code Quality (/check, /clean, /code-analysis)"
+                echo "3. Documentation (/create-docs, /mermaid)"
+                read -p "Categories (comma-separated): " categories
+                # Implementation would copy specific files
+                ;;
+        esac
+        ;;
+    3)
+        echo ""
+        echo "Update API Keys in ~/.zshrc:"
+        echo "1. OPENAI_API_KEY (for Peekaboo AI vision)"
+        echo "2. GITHUB_PERSONAL_ACCESS_TOKEN (for GitHub MCP)"
+        echo "3. FIRECRAWL_API_KEY (for web scraping)"
+        read -p "Which key? " key_choice
+        echo "Add to ~/.zshrc and run: source ~/.zshrc"
+        ;;
+    4)
+        echo ""
+        echo "Current Configuration:"
+        echo "====================="
+        echo ""
+        echo "MCP Servers:"
+        claude mcp list
+        echo ""
+        echo "Project Rules:"
+        if grep -q "@.*project-rules" ~/.claude/CLAUDE.md; then
+            echo "✓ Project rules installed"
+            grep "@.*project-rules" ~/.claude/CLAUDE.md
+        else
+            echo "✗ Project rules not installed"
+        fi
+        ;;
+    5)
+        exit 0
+        ;;
+esac
+```
+
+Save as `tweak-claude.sh` for easy customization after initial setup.
+
 ## Terminal Scripts
 
 ### 1. cly - Claude CLI Helper
