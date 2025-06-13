@@ -2,6 +2,96 @@
 
 This document contains all MCP (Model Context Protocol) servers configured for @steipete, along with installation instructions for future AI assistants.
 
+## 📥 Quick Start - Fetching Related Files
+
+If you're working with a fresh Claude instance, you can fetch all necessary files directly from GitHub:
+
+```bash
+# Create working directory
+mkdir -p ~/Projects/agent-rules/global-rules
+cd ~/Projects/agent-rules/global-rules
+
+# Fetch this documentation
+curl -O https://raw.githubusercontent.com/steipete/agent-rules/refs/heads/main/global-rules/steipete-mcps.md
+
+# Fetch the MCP sync script
+curl -O https://raw.githubusercontent.com/steipete/agent-rules/refs/heads/main/global-rules/mcp-sync.sh
+chmod +x mcp-sync.sh
+
+# Fetch the MCP sync rule documentation
+curl -O https://raw.githubusercontent.com/steipete/agent-rules/refs/heads/main/global-rules/mcp-sync-rule.md
+
+# Optional: Clone the entire repository for all rules and documentation
+git clone https://github.com/steipete/agent-rules.git ~/Projects/agent-rules
+```
+
+### Using Raw GitHub URLs
+
+All files in this repository can be accessed via raw GitHub URLs:
+- Base URL: `https://raw.githubusercontent.com/steipete/agent-rules/refs/heads/main/`
+- Example: `https://raw.githubusercontent.com/steipete/agent-rules/refs/heads/main/global-rules/mcp-sync.sh`
+
+You can use these URLs with:
+- `curl` or `wget` to download files
+- `source <(curl -s URL)` to execute bash scripts directly
+- Claude's WebFetch tool to read content
+
+### Essential Files for MCP Setup
+
+1. **This Documentation**: `global-rules/steipete-mcps.md`
+   - Complete MCP server list and installation instructions
+   
+2. **Sync Script**: `global-rules/mcp-sync.sh`
+   - Analyzes and compares MCP configurations across apps
+   - Can switch servers between local and global configs
+   
+3. **Sync Rule**: `global-rules/mcp-sync-rule.md`
+   - Documentation about MCP configuration file locations
+   - Explains differences between app formats
+
+### One-Line Setup
+
+For a completely fresh system, run this to get started:
+
+```bash
+curl -s https://raw.githubusercontent.com/steipete/agent-rules/refs/heads/main/global-rules/steipete-mcps.md | grep -A 1000 "Quick Installation" | bash
+```
+
+Or to just download and prepare:
+
+```bash
+bash <(curl -s https://raw.githubusercontent.com/steipete/agent-rules/refs/heads/main/global-rules/setup-mcps.sh)
+```
+
+### For AI Assistants (Claude)
+
+If you're Claude or another AI assistant, you can read these files directly using available tools:
+
+```python
+# Using WebFetch to read the documentation
+WebFetch(
+    url="https://raw.githubusercontent.com/steipete/agent-rules/refs/heads/main/global-rules/steipete-mcps.md",
+    prompt="Extract the installation instructions"
+)
+
+# Using WebFetch to read the sync script
+WebFetch(
+    url="https://raw.githubusercontent.com/steipete/agent-rules/refs/heads/main/global-rules/mcp-sync.sh",
+    prompt="Summarize what this script does"
+)
+```
+
+Or use bash to download and execute:
+
+```bash
+# Download and read locally
+curl -s https://raw.githubusercontent.com/steipete/agent-rules/refs/heads/main/global-rules/steipete-mcps.md > /tmp/steipete-mcps.md
+cat /tmp/steipete-mcps.md
+
+# Download and execute setup
+curl -s https://raw.githubusercontent.com/steipete/agent-rules/refs/heads/main/global-rules/setup-mcps.sh | bash
+```
+
 ## ⚠️ SECURITY WARNING ⚠️
 
 **NEVER include API keys, passwords, or any sensitive credentials directly in this document!**
@@ -23,7 +113,7 @@ These servers can be installed and used immediately:
 These servers require authentication to function:
 - 🔑 **GitHub** - Requires `GITHUB_PERSONAL_ACCESS_TOKEN`
 - 🔑 **Peekaboo** - Works better with `OPENAI_API_KEY` (falls back to Ollama)
-- 🔑 **Firecrawl** - Works with default key, custom key optional
+- 🔑 **Firecrawl** - Requires `FIRECRAWL_API_KEY` to function
 - 🔑 **Obsidian** - Uses default key, custom key optional
 
 ### Special Requirements
@@ -193,7 +283,7 @@ echo ""
 declare -A KEY_REQUIREMENTS=(
     ["OPENAI_API_KEY"]="Peekaboo (for GPT-4 Vision)"
     ["GITHUB_PERSONAL_ACCESS_TOKEN"]="GitHub MCP"
-    ["FIRECRAWL_API_KEY"]="Firecrawl (optional - has default)"
+    ["FIRECRAWL_API_KEY"]="Firecrawl web scraping"
     ["OBSIDIAN_API_KEY"]="Obsidian (optional - has default)"
 )
 
@@ -239,10 +329,10 @@ else
                 echo "   - Add to ~/.zshrc: export GITHUB_PERSONAL_ACCESS_TOKEN=\"ghp_...\""
                 ;;
             "FIRECRAWL_API_KEY")
-                echo "3. For $key (optional):"
+                echo "3. For $key:"
                 echo "   - Get key from: https://www.firecrawl.dev"
                 echo "   - Add to ~/.zshrc: export FIRECRAWL_API_KEY=\"fc-...\""
-                echo "   - Note: Will use default key if not provided"
+                echo "   - Note: Required for Firecrawl to function"
                 ;;
         esac
     done
@@ -357,8 +447,7 @@ if [ -n "$FIRECRAWL_KEY" ]; then
     echo "  ✓ FIRECRAWL_API_KEY found (${#FIRECRAWL_KEY} chars)"
 else
     echo "  ✗ FIRECRAWL_API_KEY not found in .zshrc"
-    echo "    Using default key for Firecrawl"
-    FIRECRAWL_KEY="fc-f8675e0366254d3c81afc9429b700aa1"
+    echo "    Firecrawl MCP will not be installed"
 fi
 
 echo "  ✓ OBSIDIAN_API_KEY ready (${#OBSIDIAN_KEY} chars)"
@@ -450,9 +539,9 @@ echo "✓ Installing GitMCP..."
 claude mcp add -s user -t sse gitmcp https://gitmcp.io/docs
 ((INSTALLED_COUNT++))
 
-# 7. Firecrawl (can work with default key)
+# 7. Firecrawl (requires API key)
 if [ -n "$FIRECRAWL_KEY" ]; then
-    echo "✓ Installing Firecrawl with custom API key..."
+    echo "✓ Installing Firecrawl with API key..."
     claude mcp add-json -s user firecrawl-mcp "{
       \"command\": \"npx\",
       \"args\": [\"-y\", \"firecrawl-mcp\"],
@@ -460,17 +549,14 @@ if [ -n "$FIRECRAWL_KEY" ]; then
         \"FIRECRAWL_API_KEY\": \"$FIRECRAWL_KEY\"
       }
     }"
+    ((INSTALLED_COUNT++))
 else
-    echo "✓ Installing Firecrawl with default API key..."
-    claude mcp add-json -s user firecrawl-mcp "{
-      \"command\": \"npx\",
-      \"args\": [\"-y\", \"firecrawl-mcp\"],
-      \"env\": {
-        \"FIRECRAWL_API_KEY\": \"fc-f8675e0366254d3c81afc9429b700aa1\"
-      }
-    }"
+    echo "✗ Skipping Firecrawl MCP (FIRECRAWL_API_KEY missing)"
+    echo "   To install:"
+    echo "   1. Get API key from https://www.firecrawl.dev"
+    echo "   2. Add to ~/.zshrc: export FIRECRAWL_API_KEY=\"fc-...\""
+    ((SKIPPED_COUNT++))
 fi
-((INSTALLED_COUNT++))
 
 # 8. Obsidian (requires plugin installation)
 if [ -f "/Users/steipete/Documents/steipete/.obsidian/plugins/mcp-tools/bin/mcp-server" ]; then
@@ -927,6 +1013,7 @@ echo ""
 source ~/.zshrc
 OPENAI_KEY=$(grep "export OPENAI_API_KEY=" ~/.zshrc | sed 's/export OPENAI_API_KEY="//' | sed 's/"$//')
 GITHUB_TOKEN=$(grep "export GITHUB_PERSONAL_ACCESS_TOKEN=" ~/.zshrc | sed 's/export GITHUB_PERSONAL_ACCESS_TOKEN="//' | sed 's/"$//')
+FIRECRAWL_KEY=$(grep "export FIRECRAWL_API_KEY=" ~/.zshrc | sed 's/export FIRECRAWL_API_KEY="//' | sed 's/"$//')
 
 # Always install these (no API keys required)
 echo "Installing servers that don't require API keys..."
@@ -947,9 +1034,10 @@ if [ -n "$GITHUB_TOKEN" ]; then
     claude mcp add-json -s user github "{\"command\": \"npx\", \"args\": [\"-y\", \"@modelcontextprotocol/server-github\"], \"env\": {\"GITHUB_PERSONAL_ACCESS_TOKEN\": \"$GITHUB_TOKEN\"}}"
 fi
 
-# Firecrawl with default key
-echo "Installing Firecrawl with default key..."
-claude mcp add-json -s user firecrawl-mcp '{"command": "npx", "args": ["-y", "firecrawl-mcp"], "env": {"FIRECRAWL_API_KEY": "fc-f8675e0366254d3c81afc9429b700aa1"}}'
+if [ -n "$FIRECRAWL_KEY" ]; then
+    echo "Installing Firecrawl (FIRECRAWL_API_KEY found)..."
+    claude mcp add-json -s user firecrawl-mcp "{\"command\": \"npx\", \"args\": [\"-y\", \"firecrawl-mcp\"], \"env\": {\"FIRECRAWL_API_KEY\": \"$FIRECRAWL_KEY\"}}"
+fi
 
 # Check for Obsidian
 if [ -f "/Users/steipete/Documents/steipete/.obsidian/plugins/mcp-tools/bin/mcp-server" ]; then
@@ -1185,6 +1273,38 @@ This configuration provides @steipete with:
 - 🎭 **Playwright**: Browser automation
 
 All servers are configured with appropriate API keys from `.zshrc` and optimized for each application's capabilities.
+
+---
+
+## 🔗 Quick Reference - GitHub URLs
+
+All files can be fetched from the repository using these URLs:
+
+### Documentation Files
+- **This file**: https://raw.githubusercontent.com/steipete/agent-rules/refs/heads/main/global-rules/steipete-mcps.md
+- **Sync rule**: https://raw.githubusercontent.com/steipete/agent-rules/refs/heads/main/global-rules/mcp-sync-rule.md
+- **Repository**: https://github.com/steipete/agent-rules
+
+### Executable Scripts
+```bash
+# MCP Sync Script
+curl -sO https://raw.githubusercontent.com/steipete/agent-rules/refs/heads/main/global-rules/mcp-sync.sh && chmod +x mcp-sync.sh
+
+# Setup Helper Script
+curl -s https://raw.githubusercontent.com/steipete/agent-rules/refs/heads/main/global-rules/setup-mcps.sh | bash
+
+# Direct execution without downloading
+bash <(curl -s https://raw.githubusercontent.com/steipete/agent-rules/refs/heads/main/global-rules/setup-mcps.sh)
+```
+
+### For Fresh Claude Instances
+
+If you're starting fresh, just run:
+```bash
+curl -sL https://raw.githubusercontent.com/steipete/agent-rules/refs/heads/main/global-rules/setup-mcps.sh | bash
+```
+
+This will download all necessary files and prepare everything for MCP installation.
 
 ---
 
