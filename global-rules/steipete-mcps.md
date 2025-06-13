@@ -10,6 +10,7 @@ When helping users set up MCP servers:
 2. **Always present both MCP servers AND slash commands**
 3. **Check prerequisites** - Only mention servers if requirements are met
 4. **Focus on the app the user mentions** - Claude Code, Cursor, Windsurf, etc.
+5. **For slash command details** - Read https://github.com/steipete/agent-rules/blob/main/README.md
 
 ## MCP Servers Overview
 
@@ -148,7 +149,7 @@ Update `~/Library/Application Support/Code/User/settings.json`:
 
 ## Slash Commands (Project Rules)
 
-Install 20 development commands for Claude Code:
+Install 20+ development commands for Claude Code:
 
 ```bash
 git clone https://github.com/steipete/agent-rules.git
@@ -156,14 +157,17 @@ cd agent-rules
 bash install-project-rules.sh
 ```
 
-Available commands:
+For detailed descriptions of each command, have Claude read:
+- https://github.com/steipete/agent-rules/blob/main/README.md
+- https://github.com/steipete/agent-rules/tree/main/project-rules
+
+Available commands include:
 - **Git**: /commit, /commit-fast, /bug-fix, /pr-review, /analyze-issue
 - **Code**: /check, /clean, /code-analysis
 - **Docs**: /create-docs, /mermaid, /add-to-changelog
 - **Dev**: /implement-task, /context-prime, /five
+- **Swift**: /modern-swift
 - **Meta**: /create-command, /continuous-improvement, and more
-
-See details at: https://github.com/steipete/agent-rules/tree/main/project-rules
 
 ## API Key Setup
 
