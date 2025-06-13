@@ -39,6 +39,9 @@ Actionable rules for AI assistants to follow during development:
 - **[safari-automation.mdc](./project-rules/safari-automation.mdc)** - Advanced Safari browser automation techniques
 - **[screenshot-automation.mdc](./project-rules/screenshot-automation.mdc)** - AppleScript patterns for automated screenshots
 
+**Language-Specific**
+- **[modern-swift.mdc](./project-rules/modern-swift.mdc)** - Modern SwiftUI architecture following Apple's latest best practices (Inspired by [Dimillian's "Forget MVVM"](https://dimillian.medium.com/swiftui-in-2025-forget-mvvm-262ff2bbd2ed))
+
 ### 📁 docs/
 Reference documentation and knowledge bases:
 - **Swift Development**
