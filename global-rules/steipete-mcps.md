@@ -2,6 +2,8 @@
 
 **For Claude Code and other AI-enabled IDEs**
 
+Learn more about MCP servers and slash commands: https://steipete.me/posts/2025/commanding-your-claude-code-army
+
 ## 🚨 Instructions for AI Assistants
 
 When helping users set up MCP servers:
@@ -182,6 +184,14 @@ Then run `source ~/.zshrc`
 - **Claude Desktop**: Only supports stdio (no SSE/HTTP)
 - **Permissions**: Grant Screen Recording for Peekaboo
 - **Restart required**: After config changes
+
+## Tips
+
+- Use `-s user` flag to install servers globally in Claude Code
+- API keys should be in ~/.zshrc, not hardcoded
+- Always extract keys from environment variables
+- Ensure local paths exist before adding (e.g., Obsidian MCP server)
+- Use `mcp-sync.sh` to compare configs across different apps
 
 ## Presentation Template
 
