@@ -401,7 +401,7 @@ if [ -d "/Applications/Obsidian.app" ]; then
         echo "✓ Obsidian MCP Tools plugin installed"
     else
         echo "✗ Obsidian MCP Tools plugin not found"
-        echo "  Install from Obsidian Community Plugins"
+        echo "  Plugin available in Obsidian Community Plugins"
     fi
 else
     echo "✗ Obsidian.app not found - skipping Obsidian MCP"
@@ -444,10 +444,12 @@ fi
 ### Prerequisites Check & Installation
 
 ```bash
-# 1. Check and install jq (required for JSON manipulation)
+# 1. Check for jq (required for JSON manipulation)
 if ! command -v jq &> /dev/null; then
-    echo "Installing jq..."
-    brew install jq
+    echo "❌ jq is not installed"
+    echo "   This script requires jq for JSON manipulation"
+    echo "   Please ask your system administrator to install it"
+    exit 1
 else
     echo "✓ jq is installed"
 fi
@@ -455,25 +457,25 @@ fi
 # 2. Check Node.js version (required: v20.0+)
 NODE_VERSION=$(node -v 2>/dev/null | sed 's/v//' | cut -d. -f1)
 if [ -z "$NODE_VERSION" ] || [ "$NODE_VERSION" -lt 20 ]; then
-    echo "⚠️  Node.js 20+ required. Current: $(node -v 2>/dev/null || echo 'Not installed')"
-    echo "Install via: brew install node or use nvm"
+    echo "❌ Node.js 20+ required. Current: $(node -v 2>/dev/null || echo 'Not installed')"
+    echo "   MCP servers require Node.js version 20 or higher"
+    echo "   Please ask your system administrator to update Node.js"
     exit 1
 else
     echo "✓ Node.js $(node -v) is installed"
 fi
 
-# 3. Check and install Ollama (for Peekaboo fallback)
+# 3. Check for Ollama (optional - for Peekaboo fallback)
 if ! command -v ollama &> /dev/null; then
-    echo "Installing Ollama for Peekaboo fallback..."
-    brew install ollama
-    # Pull the vision model
-    ollama pull llava:latest
+    echo "⚠️  Ollama not found (optional)"
+    echo "   Peekaboo will use OpenAI API only"
+    echo "   For local AI fallback, ask your administrator to install Ollama"
 else
     echo "✓ Ollama is installed"
-    # Ensure vision model is available
+    # Check if vision model is available
     if ! ollama list | grep -q "llava:latest"; then
-        echo "Pulling llava:latest model..."
-        ollama pull llava:latest
+        echo "   Note: llava:latest model not found"
+        echo "   Run 'ollama pull llava:latest' for local vision AI"
     fi
 fi
 
@@ -484,7 +486,7 @@ mkdir -p ~/Library/Application\ Support/Code/User
 
 # 5. Check for required binaries
 if [ ! -f "/Users/steipete/Documents/steipete/.obsidian/plugins/mcp-tools/bin/mcp-server" ]; then
-    echo "⚠️  Obsidian MCP server not found. Install Obsidian MCP Tools plugin first."
+    echo "⚠️  Obsidian MCP server binary not found at expected location"
 fi
 ```
 
@@ -1022,9 +1024,9 @@ source ~/.zshrc  # Load environment variables
 
 # Check prerequisites
 echo "Checking prerequisites..."
-command -v jq &> /dev/null || { echo "❌ jq not installed. Run: brew install jq"; exit 1; }
-command -v node &> /dev/null || { echo "❌ Node.js not installed. Install Node.js 20+"; exit 1; }
-command -v ollama &> /dev/null || { echo "⚠️  Ollama not installed. Installing..."; brew install ollama; }
+command -v jq &> /dev/null || { echo "❌ jq not installed. Required for JSON manipulation"; exit 1; }
+command -v node &> /dev/null || { echo "❌ Node.js not installed. Required for MCP servers"; exit 1; }
+command -v ollama &> /dev/null || echo "⚠️  Ollama not installed. Peekaboo will use OpenAI only"
 
 # Extract API keys
 OPENAI_KEY=$(grep "export OPENAI_API_KEY=" ~/.zshrc | sed 's/export OPENAI_API_KEY="//' | sed 's/"$//')
@@ -1512,17 +1514,15 @@ ls -la ~/bin/ ~/.local/bin/ /usr/local/bin/ | grep -E "cly|title"
 
 1. **"jq: command not found"**
    ```bash
-   brew install jq
+   # jq is required for JSON manipulation
+   # Please ask your system administrator to install it
    ```
 
 2. **"Node.js version too old"**
    ```bash
-   # Install Node.js 20+ via nvm
-   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
-   source ~/.zshrc
-   nvm install 20
-   nvm use 20
-   nvm alias default 20
+   # MCP servers require Node.js 20+
+   # Please ask your system administrator to update Node.js
+   # Current version can be checked with: node -v
    ```
 
 3. **"Permission denied" errors**
@@ -1548,8 +1548,8 @@ ls -la ~/bin/ ~/.local/bin/ /usr/local/bin/ | grep -E "cly|title"
    # Check if Obsidian MCP Tools plugin is installed
    ls -la /Users/steipete/Documents/steipete/.obsidian/plugins/mcp-tools/
    
-   # If Obsidian.app missing: Download from https://obsidian.md
-   # If plugin missing: Install via Obsidian Community Plugins
+   # If Obsidian.app missing: Obsidian MCP cannot be used
+   # If plugin missing: Available in Obsidian Community Plugins
    ```
 
 6. **Peekaboo not taking screenshots**
