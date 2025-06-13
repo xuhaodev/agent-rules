@@ -197,7 +197,7 @@ Then run `source ~/.zshrc`
 
 ## Terminal Title Trick
 
-Add this to your `~/.zshrc` to see which folder Claude Code is working on:
+When running multiple Claude Code instances, it's hard to know which terminal is working on which project. Add this `cly` function to your `~/.zshrc` to solve this:
 
 ```bash
 cly () {
@@ -210,7 +210,13 @@ cly () {
 }
 ```
 
-This shows the current folder name in your terminal tab, making it easy to track multiple Claude Code instances. The `cly` function also bypasses permission prompts for smoother operation.
+**What it does:**
+- Shows the current folder name in your terminal tab (e.g., "agent-rules — Claude")
+- Bypasses permission prompts with `--dangerously-skip-permissions`
+- Restores the original terminal title when Claude exits
+- Makes it easy to identify which Claude instance is working on which project
+
+**Usage:** Instead of typing `claude`, type `cly` to start Claude Code with dynamic terminal titles.
 
 Learn more about this terminal title trick and other Claude Code tips at: https://steipete.me/posts/2025/commanding-your-claude-code-army
 
