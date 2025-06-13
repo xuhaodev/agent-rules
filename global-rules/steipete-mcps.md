@@ -2,6 +2,16 @@
 
 This document contains all MCP (Model Context Protocol) servers configured for @steipete, along with installation instructions for future AI assistants.
 
+## 🚨 CRITICAL INSTRUCTIONS FOR AI ASSISTANTS
+
+**READ THIS FIRST**: When using this document to help users:
+
+1. **NO IDE INSTALLATIONS** - NEVER recommend installing Claude Desktop, VS Code, Cursor, or any IDE
+2. **Claude Code ONLY** - Focus exclusively on configuring Claude Code (the CLI tool)
+3. **Check Prerequisites** - ALWAYS verify Obsidian.app exists before mentioning Obsidian MCP
+4. **Conditional Recommendations** - Only suggest servers whose prerequisites are met
+5. **Work With What Exists** - Only configure tools already installed on the user's system
+
 ## 📥 Quick Start - Fetching Related Files
 
 If you're working with a fresh Claude instance, you can fetch all necessary files directly from GitHub:
@@ -63,29 +73,65 @@ Or to just download and prepare:
 bash <(curl -s https://raw.githubusercontent.com/steipete/agent-rules/refs/heads/main/global-rules/setup-mcps.sh)
 ```
 
-### For AI Assistants (Claude)
+### For AI Assistants (Claude) - IMPORTANT INSTRUCTIONS
 
-When presenting MCP servers to users:
+When helping users set up MCP servers, follow these rules STRICTLY:
 
-1. **Check what's available first**:
-   - Run `ls -la /Applications/Obsidian.app` to check if Obsidian is installed
-   - Only mention servers that make sense for the user's setup
+1. **NEVER recommend installing ANY applications**:
+   - Do NOT suggest installing Claude Desktop, VS Code, Cursor, Windsurf, or any IDE
+   - Do NOT suggest installing Obsidian or any other apps
+   - Focus ONLY on Claude Code (the CLI tool) configuration
+   - Work only with applications already installed on the system
 
-2. **Present each with a clear one-liner**:
-   - **Peekaboo**: "Take screenshots and optionally analyze them with AI - essential tool that works without AI too"
-   - **Context7**: "Fetch up-to-date documentation for any library or framework"
-   - **GitHub**: "Access and manage GitHub repos, issues, and pull requests" (if they have repos)
+2. **Check prerequisites before recommending**:
+   - For Obsidian: ONLY mention if `/Applications/Obsidian.app` exists
+   - Run `ls -la /Applications/Obsidian.app 2>/dev/null` first
+   - If it doesn't exist, DO NOT mention Obsidian MCP at all
+   - Check for API keys before recommending servers that need them
+
+3. **Present servers based on what's available**:
+   **Always recommend these (no prerequisites)**:
+   - **Peekaboo**: "Essential screenshot tool - works without AI, enhanced with OpenAI"
+   - **Context7**: "Fetch up-to-date documentation for any library"
    - **Agent**: "Run Claude Code as a sub-agent for complex tasks"
-   - **Automator**: "Control macOS system features and automate workflows"
-   - **GitMCP**: "Enhanced Git operations with visual diffs and branch management"
-   - **Firecrawl**: "Convert any website into clean, LLM-ready markdown"
-   - **Obsidian**: "Read and write to your Obsidian knowledge base" (ONLY if Obsidian.app exists)
-   - **Playwright**: "Automate web browsers for testing and scraping"
+   - **Automator**: "Control macOS system features"
+   - **GitMCP**: "Enhanced Git operations with visual diffs"
+   - **Playwright**: "Automate web browsers for testing"
 
-3. **Emphasize Peekaboo**:
-   - Always recommend Peekaboo as it's the only screenshot tool
-   - Explain it works perfectly without AI for capturing screens
-   - Mention that OpenAI key adds AI analysis but is optional
+   **Only if prerequisites met**:
+   - **GitHub**: "Access GitHub repos/issues" (ONLY if GITHUB_PERSONAL_ACCESS_TOKEN exists)
+   - **Firecrawl**: "Web scraping to markdown" (ONLY if FIRECRAWL_API_KEY exists)
+   - **Obsidian**: "Knowledge base integration" (ONLY if Obsidian.app exists)
+
+4. **Installation focus**:
+   - Use `claude mcp` commands for Claude Code
+   - Do NOT create claude_desktop_config.json unless it already exists
+   - Focus on user scope (`-s user`) for all installations
+
+5. **Presentation format**:
+   ```
+   Based on your system, I recommend these MCP servers:
+   
+   Essential (work immediately):
+   • Peekaboo - Take screenshots (no AI key required)
+   • Context7 - Get current documentation
+   • Agent - Run sub-agents for complex tasks
+   
+   Available with API keys:
+   • GitHub - Manage repos (requires GITHUB_PERSONAL_ACCESS_TOKEN)
+   • Firecrawl - Scrape websites (requires FIRECRAWL_API_KEY)
+   
+   [Only show if Obsidian.app exists]:
+   • Obsidian - Connect to your knowledge base
+   ```
+
+6. **NEVER suggest these actions**:
+   - Installing ANY applications (Claude Desktop, VS Code, Cursor, Obsidian, etc.)
+   - Downloading software from ANY website
+   - Creating config files for apps that aren't installed
+   - Setting up servers the user hasn't asked for
+   - Mentioning servers whose prerequisites aren't met
+   - Recommending the user install missing prerequisites
 
 If you're Claude or another AI assistant, you can read these files directly using available tools:
 
