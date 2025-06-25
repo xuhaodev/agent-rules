@@ -11,11 +11,38 @@
 7. [Migration Guide](#migration-guide)
 8. [Code Examples](#code-examples)
 9. [Best Practices](#best-practices)
-10. [Resources](#resources)
+10. [Testing and Debugging](#testing-and-debugging)
+11. [Common Compiler Errors](#common-compiler-errors)
+12. [Performance Tuning](#performance-tuning)
+13. [Swift 6.1+ Roadmap](#swift-61-roadmap)
+14. [Resources](#resources)
 
 ## Introduction
 
 Swift 6 represents a revolutionary leap in concurrent programming, introducing compile-time data race safety that eliminates an entire class of bugs. This comprehensive guide covers all Swift Evolution proposals, practical examples, and migration strategies for adopting Swift 6's strict concurrency model.
+
+### Quick Start: Enable Strict Concurrency
+
+**Xcode:**
+```
+Build Settings → Swift Compiler - Language → Strict Concurrency Checking → Complete
+```
+
+**Command Line:**
+```bash
+swiftc -strict-concurrency=complete -swift-version 6 MyFile.swift
+```
+
+**Package.swift:**
+```swift
+.target(
+    name: "MyTarget",
+    swiftSettings: [
+        .enableUpcomingFeature("StrictConcurrency"),
+        .swiftLanguageMode(.v6)  // or stay on .v5 with warnings
+    ]
+)
+```
 
 ### What is Swift 6 Concurrency?
 
@@ -1108,6 +1135,470 @@ func longRunningOperation() async throws -> Result {
     }
 }
 ```
+
+## Testing and Debugging
+
+### Thread Sanitizer (TSan)
+
+Thread Sanitizer remains essential for catching runtime data races that escape compile-time checks:
+
+```bash
+# Enable in Xcode
+Product → Scheme → Edit Scheme → Diagnostics → Thread Sanitizer
+
+# Or via command line
+swift test -Xswiftc -sanitize=thread
+```
+
+**When to use TSan:**
+- Testing legacy code with @preconcurrency imports
+- Verifying @unchecked Sendable implementations
+- Catching races in C/Objective-C interop
+
+### Swift Concurrency Debugger (Xcode 16+)
+
+New debugging tools for concurrent code:
+
+1. **Task Tree View**: Visualize parent-child task relationships
+2. **Actor Memory Graph**: See actor isolation boundaries
+3. **Hop Tracking**: Follow execution across isolation domains
+
+```swift
+// Debugging helpers
+extension Task {
+    static func currentPriority() -> TaskPriority {
+        Task.currentPriority
+    }
+    
+    static func printTaskTree() {
+        // Available in debug builds
+        #if DEBUG
+        print("Task: \(Task<Never, Never>.currentPriority)")
+        #endif
+    }
+}
+```
+
+### Unit Testing Concurrent Code
+
+```swift
+// Test helper for async code with timeout
+func withTimeout<T>(
+    _ duration: Duration = .seconds(5),
+    operation: @escaping () async throws -> T
+) async throws -> T {
+    try await withThrowingTaskGroup(of: T.self) { group in
+        group.addTask {
+            try await operation()
+        }
+        
+        group.addTask {
+            try await Task.sleep(for: duration)
+            throw TimeoutError()
+        }
+        
+        let result = try await group.next()!
+        group.cancelAll()
+        return result
+    }
+}
+
+// Testing actor isolation
+final class ActorTests: XCTestCase {
+    func testActorIsolation() async throws {
+        let actor = TestActor()
+        
+        // Verify isolation with multiple concurrent operations
+        try await withThrowingTaskGroup(of: Int.self) { group in
+            for i in 0..<100 {
+                group.addTask {
+                    await actor.increment()
+                    return await actor.value
+                }
+            }
+            
+            var results: Set<Int> = []
+            for try await result in group {
+                results.insert(result)
+            }
+            
+            // All results should be unique if properly isolated
+            XCTAssertEqual(results.count, 100)
+        }
+    }
+}
+```
+
+### Debugging Common Issues
+
+```swift
+// 1. Debugging unexpected suspension points
+actor DataManager {
+    func debugSuspension() async {
+        print("Before suspension: \(Thread.current)")
+        await someAsyncOperation()
+        print("After suspension: \(Thread.current)") // May be different thread
+    }
+}
+
+// 2. Tracking isolation context
+func debugIsolation(
+    isolation: isolated (any Actor)? = #isolation
+) async {
+    if let isolation {
+        print("Running on: \(type(of: isolation))")
+    } else {
+        print("Running on non-isolated context")
+    }
+}
+
+// 3. Detecting priority inversions
+Task(priority: .low) {
+    await debugPriority() // May run at higher priority due to escalation
+}
+
+func debugPriority() async {
+    print("Current priority: \(Task.currentPriority)")
+}
+```
+
+## Common Compiler Errors
+
+### Error Reference Table
+
+| Diagnostic | Example | Fix |
+|------------|---------|-----|
+| **Non-Sendable type crossing actor boundary** | `Capture of 'nonSendable' with non-sendable type 'MyClass'` | 1. Make type Sendable<br>2. Use `sending` parameter<br>3. Copy/transform to Sendable type |
+| **Actor-isolated property referenced from non-isolated** | `Actor-isolated property 'items' can not be referenced from a non-isolated context` | 1. Add `await`<br>2. Move code to actor<br>3. Make property `nonisolated` |
+| **Call to main actor-isolated from non-isolated** | `Call to main actor-isolated instance method 'updateUI()' in a synchronous nonisolated context` | 1. Add `@MainActor` to caller<br>2. Use `await MainActor.run { }`<br>3. Make method `nonisolated` |
+| **Mutation of captured var** | `Mutation of captured var 'counter' in concurrently-executing code` | 1. Use actor for state<br>2. Make immutable<br>3. Use `Mutex` (Swift 6.1+) |
+| **Sendable closure captures non-Sendable** | `Capture of 'self' with non-sendable type 'ViewController?' in a `@Sendable` closure` | 1. Use `[weak self]`<br>2. Make type Sendable<br>3. Extract needed values before closure |
+
+### Detailed Error Solutions
+
+#### 1. Non-Sendable Type Errors
+
+```swift
+// ❌ Error: Non-Sendable type 'UIImage' crossing actor boundary
+class ImageProcessor {
+    func process(image: UIImage) async {
+        Task.detached {
+            // Error: capture of 'image' with non-sendable type
+            manipulate(image)
+        }
+    }
+}
+
+// ✅ Solution 1: Use sending parameter
+class ImageProcessor {
+    func process(image: sending UIImage) async {
+        Task.detached {
+            manipulate(image) // Ownership transferred
+        }
+    }
+}
+
+// ✅ Solution 2: Convert to Sendable representation
+class ImageProcessor {
+    func process(image: UIImage) async {
+        let imageData = image.pngData()! // Data is Sendable
+        Task.detached {
+            let recreated = UIImage(data: imageData)!
+            manipulate(recreated)
+        }
+    }
+}
+```
+
+#### 2. Actor Isolation Errors
+
+```swift
+// ❌ Error: Actor-isolated property accessed without await
+actor DataStore {
+    var items: [Item] = []
+    
+    nonisolated func getItemCount() -> Int {
+        items.count // Error: actor-isolated property
+    }
+}
+
+// ✅ Solution 1: Make method async
+actor DataStore {
+    var items: [Item] = []
+    
+    func getItemCount() async -> Int {
+        items.count // OK: implicitly isolated to actor
+    }
+}
+
+// ✅ Solution 2: Use computed property
+actor DataStore {
+    private var items: [Item] = []
+    
+    var itemCount: Int {
+        items.count // OK: computed property is isolated
+    }
+}
+```
+
+#### 3. MainActor Isolation Errors
+
+```swift
+// ❌ Error: Call to MainActor-isolated from background
+func backgroundWork() {
+    updateUI() // Error: MainActor-isolated
+}
+
+@MainActor
+func updateUI() { }
+
+// ✅ Solution 1: Make caller MainActor
+@MainActor
+func backgroundWork() async {
+    await fetchData()
+    updateUI() // OK: both on MainActor
+}
+
+// ✅ Solution 2: Explicit MainActor.run
+func backgroundWork() async {
+    let data = await fetchData()
+    await MainActor.run {
+        updateUI()
+    }
+}
+```
+
+## Performance Tuning
+
+### Task Creation Overhead
+
+```swift
+// ❌ Excessive task creation
+for item in items {
+    Task {
+        await process(item) // Creates N unstructured tasks
+    }
+}
+
+// ✅ Use TaskGroup for batch operations
+await withTaskGroup(of: Void.self) { group in
+    for item in items {
+        group.addTask {
+            await process(item) // Structured, limited concurrency
+        }
+    }
+}
+
+// ✅ Or use concurrent forEach
+await items.concurrentForEach { item in
+    await process(item)
+}
+```
+
+### Clock APIs for Efficient Timing
+
+```swift
+// ❌ Old-style sleep
+Task {
+    Thread.sleep(forTimeInterval: 1.0) // Blocks thread
+}
+
+// ❌ Task.sleep with nanoseconds
+Task {
+    try await Task.sleep(nanoseconds: 1_000_000_000)
+}
+
+// ✅ Modern Clock-based approach
+let clock = ContinuousClock()
+try await clock.sleep(for: .seconds(1))
+
+// ✅ Measure elapsed time
+let elapsed = await clock.measure {
+    await expensiveOperation()
+}
+print("Operation took: \(elapsed)")
+
+// ✅ Custom clock for testing
+struct TestClock: Clock {
+    var now: Instant { .init() }
+    func sleep(until deadline: Instant) async throws {
+        // Instant return for tests
+    }
+}
+```
+
+### Structured vs Unstructured Tasks
+
+```swift
+// ❌ Unstructured tasks lose context
+class Service {
+    func startBackgroundWork() {
+        Task {
+            await longRunningWork() // No cancellation propagation
+        }
+    }
+}
+
+// ✅ Structured tasks with proper lifecycle
+class Service {
+    private var workTask: Task<Void, Never>?
+    
+    func startBackgroundWork() {
+        workTask = Task {
+            try await withTaskCancellationHandler {
+                await longRunningWork()
+            } onCancel: {
+                cleanup()
+            }
+        }
+    }
+    
+    func stopWork() {
+        workTask?.cancel()
+    }
+}
+
+// ✅ Detached tasks only for true daemons
+Task.detached(priority: .background) {
+    // Long-lived background monitoring
+    while !Task.isCancelled {
+        await checkSystemHealth()
+        try await Task.sleep(for: .minutes(5))
+    }
+}
+```
+
+### Actor Contention Optimization
+
+```swift
+// ❌ High contention on single actor
+actor Counter {
+    private var value = 0
+    
+    func increment() {
+        value += 1
+    }
+}
+
+// ✅ Reduce contention with batching
+actor Counter {
+    private var value = 0
+    
+    func increment(by amount: Int = 1) {
+        value += amount
+    }
+    
+    func batchIncrement(_ operations: [Int]) {
+        value += operations.reduce(0, +)
+    }
+}
+
+// ✅ Or use sharding for high throughput
+actor ShardedCounter {
+    private var shards: [Int]
+    
+    init(shardCount: Int = ProcessInfo.processInfo.activeProcessorCount) {
+        self.shards = Array(repeating: 0, count: shardCount)
+    }
+    
+    func increment() {
+        let shard = Int.random(in: 0..<shards.count)
+        shards[shard] += 1
+    }
+    
+    var total: Int {
+        shards.reduce(0, +)
+    }
+}
+```
+
+## Swift 6.1+ Roadmap
+
+### Swift 6.1 (Shipped)
+
+#### SE-0431: @isolated(any) Function Types
+```swift
+// Function types that preserve isolation
+typealias IsolatedHandler = @isolated(any) () async -> Void
+
+func withIsolation(_ handler: IsolatedHandler) async {
+    await handler() // Maintains caller's isolation
+}
+
+// Use with actors
+actor MyActor {
+    func doWork() async {
+        await withIsolation {
+            // Runs on MyActor
+            print("Isolated to: \(self)")
+        }
+    }
+}
+```
+
+#### SE-0433: Synchronous Mutual Exclusion Lock (Mutex)
+```swift
+import Synchronization
+
+// For protecting critical sections without async
+final class Statistics: Sendable {
+    private let mutex = Mutex<Stats>(.init())
+    
+    func record(value: Double) {
+        mutex.withLock { stats in
+            stats.count += 1
+            stats.sum += value
+        }
+    }
+    
+    var average: Double {
+        mutex.withLock { stats in
+            stats.count > 0 ? stats.sum / Double(stats.count) : 0
+        }
+    }
+}
+
+private struct Stats {
+    var count = 0
+    var sum = 0.0
+}
+```
+
+### Swift 6.2 (In Development)
+
+#### SE-0461: Isolated Default Arguments
+```swift
+// Default values can use isolation context
+@MainActor
+class ViewModel {
+    // ✅ Default can access MainActor state
+    func configure(
+        title: String = defaultTitle // Coming in 6.2
+    ) { }
+    
+    @MainActor
+    static var defaultTitle: String { "Default" }
+}
+```
+
+### Future Proposals Under Review
+
+1. **SE-0449**: Allow nonisolated to prevent global actor inference
+2. **SE-0450**: Limiting actor isolation inference
+3. **SE-0451**: Isolated synchronous deinit
+4. **Typed Throws in Concurrency**: Better error propagation
+5. **Custom Executors v2**: More control over task execution
+
+### Migration Timeline
+
+| Version | Key Features | Migration Impact |
+|---------|--------------|------------------|
+| Swift 6.0 | Strict concurrency by default | Major - requires code updates |
+| Swift 6.1 | Mutex, @isolated(any) | Minor - additive features |
+| Swift 6.2 | Isolated defaults, deinit | Minor - quality of life |
+| Swift 7.0 | Custom executors v2 | TBD - performance focused |
+
+Stay updated: [Swift Evolution Dashboard](https://www.swift.org/swift-evolution/)
 
 ## Resources
 
