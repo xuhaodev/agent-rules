@@ -10,36 +10,37 @@
 AI助手在开发过程中遵循的可操作规则：
 
 **开发工作流程** (致谢: [@vincenthopf](https://github.com/vincenthopf/claude-code))
-- **[commit.mdc](./project-rules/commit.mdc)** - 使用规范格式和表情符号的标准提交
-- **[commit-fast.mdc](./project-rules/commit-fast.mdc)** - 自动选择第一条消息的快速提交工作流程
-- **[add-to-changelog.mdc](./project-rules/add-to-changelog.mdc)** - 遵循Keep a Changelog格式的结构化更新日志
-- **[pr-review.mdc](./project-rules/pr-review.mdc)** - 多角色拉取请求审查清单
+- **[commit-zh.md](./project-rules/commit-zh.md)** / **[commit.mdc](./project-rules/commit.mdc)** - 使用规范格式和表情符号的标准提交
+- **[commit-fast-zh.md](./project-rules/commit-fast-zh.md)** / **[commit-fast.mdc](./project-rules/commit-fast.mdc)** - 自动选择第一条消息的快速提交工作流程
+- **[add-to-changelog-zh.md](./project-rules/add-to-changelog-zh.md)** / **[add-to-changelog.mdc](./project-rules/add-to-changelog.mdc)** - 遵循Keep a Changelog格式的结构化更新日志
+- **[pr-review-zh.md](./project-rules/pr-review-zh.md)** / **[pr-review.mdc](./project-rules/pr-review.mdc)** - 多角色拉取请求审查清单
 
 **代码质量与分析**
-- **[check.mdc](./project-rules/check.mdc)** - 跨不同语言的全面代码质量检查
-- **[clean.mdc](./project-rules/clean.mdc)** - 修复所有格式和代码检查问题
-- **[code-analysis.mdc](./project-rules/code-analysis.mdc)** - 高级多方面代码分析选项
+- **[check-zh.md](./project-rules/check-zh.md)** / **[check.mdc](./project-rules/check.mdc)** - 跨不同语言的全面代码质量检查
+- **[clean-zh.md](./project-rules/clean-zh.md)** / **[clean.mdc](./project-rules/clean.mdc)** - 修复所有格式和代码检查问题
+- **[code-analysis-zh.md](./project-rules/code-analysis-zh.md)** / **[code-analysis.mdc](./project-rules/code-analysis.mdc)** - 高级多方面代码分析选项
 
 **问题解决与实现**
-- **[analyze-issue.mdc](./project-rules/analyze-issue.mdc)** - GitHub问题分析和实现规范
-- **[bug-fix.mdc](./project-rules/bug-fix.mdc)** - 从问题到PR的完整错误修复工作流程
-- **[implement-task.mdc](./project-rules/implement-task.mdc)** - 系统化任务实现方法
-- **[five.mdc](./project-rules/five.mdc)** - 五个为什么根本原因分析技术
+- **[analyze-issue-zh.md](./project-rules/analyze-issue-zh.md)** / **[analyze-issue.mdc](./project-rules/analyze-issue.mdc)** - GitHub问题分析和实现规范
+- **[bug-fix-zh.md](./project-rules/bug-fix-zh.md)** / **[bug-fix.mdc](./project-rules/bug-fix.mdc)** - 从问题到PR的完整错误修复工作流程
+- **[implement-task-zh.md](./project-rules/implement-task-zh.md)** / **[implement-task.mdc](./project-rules/implement-task.mdc)** - 系统化任务实现方法
+- **[five-zh.md](./project-rules/five-zh.md)** / **[five.mdc](./project-rules/five.mdc)** - 五个为什么根本原因分析技术
 
 **文档与可视化**
-- **[create-docs.mdc](./project-rules/create-docs.mdc)** - 全面的文档生成
-- **[mermaid.mdc](./project-rules/mermaid.mdc)** - 用于各种可视化的Mermaid图表生成
+- **[create-docs-zh.md](./project-rules/create-docs-zh.md)** / **[create-docs.mdc](./project-rules/create-docs.mdc)** - 全面的文档生成
+- **[mermaid-zh.md](./project-rules/mermaid-zh.md)** / **[mermaid.mdc](./project-rules/mermaid.mdc)** - 用于各种可视化的Mermaid图表生成
 
 **项目设置与元数据**
-- **[context-prime.mdc](./project-rules/context-prime.mdc)** - 全面加载项目上下文
-- **[create-command.mdc](./project-rules/create-command.mdc)** - 创建新自定义命令的指南
-- **[continuous-improvement.mdc](./project-rules/continuous-improvement.mdc)** - 改进AI助手规则的系统化方法
-- **[cursor-rules-meta-guide.mdc](./project-rules/cursor-rules-meta-guide.mdc)** - 创建和维护Cursor规则的指南
+- **[context-prime-zh.md](./project-rules/context-prime-zh.md)** / **[context-prime.mdc](./project-rules/context-prime.mdc)** - 全面加载项目上下文
+- **[create-command-zh.md](./project-rules/create-command-zh.md)** / **[create-command.mdc](./project-rules/create-command.mdc)** - 创建新自定义命令的指南
+- **[continuous-improvement-zh.md](./project-rules/continuous-improvement-zh.md)** / **[continuous-improvement.mdc](./project-rules/continuous-improvement.mdc)** - 改进AI助手规则的系统化方法
+- **[cursor-rules-meta-guide-zh.md](./project-rules/cursor-rules-meta-guide-zh.md)** / **[cursor-rules-meta-guide.mdc](./project-rules/cursor-rules-meta-guide.mdc)** - 创建和维护Cursor规则的指南
 
 **自动化与集成**
 - **[mcp-inspector-debugging.mdc](./project-rules/mcp-inspector-debugging.mdc)** - 使用Inspector UI调试MCP服务器
 - **[safari-automation.mdc](./project-rules/safari-automation.mdc)** - 高级Safari浏览器自动化技术
 - **[screenshot-automation.mdc](./project-rules/screenshot-automation.mdc)** - 自动截图的AppleScript模式
+- **[update-docs.mdc](./project-rules/update-docs.mdc)** - 系统化文档更新和维护工作流程
 
 **特定语言**
 - **[modern-swift.mdc](./project-rules/modern-swift.mdc)** - 遵循Apple最新最佳实践的现代SwiftUI架构 (灵感来自 [Dimillian的"忘记MVVM"](https://dimillian.medium.com/swiftui-in-2025-forget-mvvm-262ff2bbd2ed))
@@ -47,24 +48,32 @@ AI助手在开发过程中遵循的可操作规则：
 ### 📁 docs/
 参考文档和知识库：
 - **Swift开发**
-  - [swift-observable.mdc](./docs/swift-observable.mdc) - 从ObservableObject迁移到@Observable宏的指南
-  - [swift-observation.mdc](./docs/swift-observation.mdc) - Swift Observation框架文档
+  - [swift-observable-zh.md](./docs/swift-observable-zh.md) / [swift-observable.mdc](./docs/swift-observable.mdc) - 从ObservableObject迁移到@Observable宏的指南
+  - [swift-observation-zh.md](./docs/swift-observation-zh.md) / [swift-observation.mdc](./docs/swift-observation.mdc) - Swift Observation框架文档
   - [swift-testing-api.mdc](./docs/swift-testing-api.mdc) - Swift Testing框架API参考
-  - [swift-testing-playbook.mdc](./docs/swift-testing-playbook.mdc) - 迁移到Swift Testing的全面指南
+  - [swift-testing-playbook-zh.md](./docs/swift-testing-playbook-zh.md) / [swift-testing-playbook.mdc](./docs/swift-testing-playbook.mdc) - 迁移到Swift Testing的全面指南
   - [swift-argument-parser.mdc](./docs/swift-argument-parser.mdc) - Swift Argument Parser框架文档
-  - [swift6-migration.mdc](./docs/swift6-migration.mdc) - 使用并发迁移到Swift 6的指南
+  - [swift6-migration-zh.md](./docs/swift6-migration-zh.md) / [swift6-migration.mdc](./docs/swift6-migration.mdc) - 使用并发迁移到Swift 6的指南
+  - [swift-concurrency-zh.md](./docs/swift-concurrency-zh.md) / [swift-concurrency.md](./docs/swift-concurrency.md) - Swift并发文档和最佳实践
+  - [swiftui-zh.md](./docs/swiftui-zh.md) / [swiftui.md](./docs/swiftui.md) - SwiftUI框架文档和模式
+  - [swiftdata-zh.md](./docs/swiftdata-zh.md) / [swiftdata.md](./docs/swiftdata.md) - SwiftData框架文档
+  - [modern-swift-zh.md](./docs/modern-swift-zh.md) / [modern-swift.md](./docs/modern-swift.md) - 现代Swift开发模式
+  - [appkit-zh.md](./docs/appkit-zh.md) / [appkit.md](./docs/appkit.md) - AppKit框架文档
+  - [uikit-zh.md](./docs/uikit-zh.md) / [uikit.md](./docs/uikit.md) - UIKit框架文档
 
 - **MCP开发**
-  - [mcp-best-practices.mdc](./docs/mcp-best-practices.mdc) - 构建模型上下文协议服务器的最佳实践
-  - [mcp-releasing.mdc](./docs/mcp-releasing.mdc) - 将MCP服务器发布为NPM包的指南
+  - [mcp-best-practices-zh.md](./docs/mcp-best-practices-zh.md) / [mcp-best-practices.mdc](./docs/mcp-best-practices.mdc) - 构建模型上下文协议服务器的最佳实践
+  - [mcp-releasing-zh.md](./docs/mcp-releasing-zh.md) / [mcp-releasing.mdc](./docs/mcp-releasing.mdc) - 将MCP服务器发布为NPM包的指南
 
 ### 📁 global-rules/
 全局Claude Code配置和自动化脚本 (放置在 `~/.claude/CLAUDE.md`):
 - **[github-issue-creation.mdc](./global-rules/github-issue-creation.mdc)** - 创建结构良好的GitHub问题 (致谢: [@nityeshaga](https://x.com/nityeshaga/status/1933113428379574367))
 - **[mcp-peekaboo-setup.mdc](./global-rules/mcp-peekaboo-setup.mdc)** - Peekaboo视觉MCP服务器的设置指南
+- **[steipete-mcps-zh.md](./global-rules/steipete-mcps-zh.md)** / **[steipete-mcps.md](./global-rules/steipete-mcps.md)** - 多种IDE的综合MCP服务器安装指南
 - **[terminal-title-wrapper.zsh](./global-rules/terminal-title-wrapper.zsh)** - 动态终端标题的ZSH包装器
 - **[mcp-sync.sh](./global-rules/mcp-sync.sh)** - 在Claude安装之间同步MCP服务器的脚本
-- **[mcp-sync-rule.md](./global-rules/mcp-sync-rule.md)** - MCP同步功能的文档
+- **[mcp-sync-rule-zh.md](./global-rules/mcp-sync-rule-zh.md)** / **[mcp-sync-rule.md](./global-rules/mcp-sync-rule.md)** - MCP同步功能的文档
+- **[setup-mcps.sh](./global-rules/setup-mcps.sh)** - 自动化MCP服务器设置脚本
 
 ## 使用方法
 

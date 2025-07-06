@@ -1,0 +1,203 @@
+---
+description: 用于 Web UI 自动化和测试的 Safari 浏览器交互自动化模式和最佳实践
+globs: "**/*.applescript, **/safari-*.js"
+alwaysApply: false
+---
+
+# Safari 自动化指南
+
+本指南记录了从 Safari 交互自动化中获得的宝贵经验，特别是用于 Web UI 自动化和测试。
+
+## 核心概念
+
+### 管理 Safari 窗口和标签页
+
+**目标:** 以可预测的方式可靠地将 Safari 导向特定 URL，最好使用单一、一致的浏览器窗口和标签页。
+
+**推荐方法:**
+```applescript
+tell application "Safari"
+  activate
+  delay 0.2 -- 允许 Safari 成为最前台应用程序
+  if (count of windows) is 0 then
+    -- 没有 Safari 窗口打开，所以创建一个新的。
+    make new document with properties {URL:"http://example.com"}
+  else
+    -- Safari 有窗口打开；使用最前台的。
+    tell front window
+      set targetTab to missing value
+      try
+        -- 检查目标 URL 的标签页是否已打开
+        set targetTab to (first tab whose URL starts with "http://example.com")
+      end try
+      
+      if targetTab is not missing value then
+        -- 重用现有标签页：刷新并激活
+        set URL of targetTab to "http://example.com"
+        set current tab to targetTab
+      else
+        -- 未找到特定标签页：使用当前活动标签页
+        set URL of current tab to "http://example.com"
+      end if
+    end tell
+  end if
+  delay 1 -- 暂停以允许页面开始加载
+end tell
+```
+
+### 在 AppleScript 中执行 JavaScript
+
+**字符串转义策略:**
+
+1. **使用转义引号:**
+   ```applescript
+   do JavaScript "document.querySelector('[data-testid=\\'my-button\\']').click();"
+   ```
+
+2. **对复杂字符串使用 character id 39:**
+   ```applescript
+   set sQuote to character id 39
+   set jsSelector to "[data-testid=" & sQuote & "my-button" & sQuote & "]"
+   set jsCommand to "document.querySelector(" & sQuote & jsSelector & sQuote & ").click();"
+   do JavaScript jsCommand in front document
+   ```
+
+3. **使用 XPath 进行稳健的元素选择:**
+   ```applescript
+   -- 查找包含特定文本的按钮
+   set jsCommand to "document.evaluate(\"//button[.//text()='Connect']\", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.click();"
+   do JavaScript jsCommand in front document
+   ```
+
+### Shadow DOM 交互
+
+**访问 Shadow DOM 内的元素:**
+```javascript
+// 通过 AppleScript 执行的 JavaScript
+function findInShadowDOM(selector) {
+  // 搜索包括 shadow roots 的辅助函数
+  function searchShadowDOM(root, selector) {
+    const el = root.querySelector(selector);
+    if (el) return el;
+    
+    // 在 shadow roots 中搜索
+    const allElements = root.querySelectorAll('*');
+    for (const element of allElements) {
+      if (element.shadowRoot) {
+        const found = searchShadowDOM(element.shadowRoot, selector);
+        if (found) return found;
+      }
+    }
+    return null;
+  }
+  
+  return searchShadowDOM(document, selector);
+}
+
+// 使用示例
+const button = findInShadowDOM('button.my-shadow-button');
+if (button) button.click();
+```
+
+### 时序和同步
+
+**策略性 vs 战术性延迟:**
+
+1. **策略性延迟 (关键):** 启动外部进程后
+   - 启动 Web 服务器后使用 5-10 秒延迟
+   - 允许服务在交互前完全初始化
+
+2. **战术性延迟 (通常可避免):** UI 自动化内
+   - UI 操作间的小延迟 (0.2-1秒)
+   - 如果应用程序响应灵敏，通常可以移除
+
+**验证模式:**
+```applescript
+-- 执行操作
+do JavaScript "document.querySelector('button').click();" in front document
+
+-- 等待并验证结果
+delay 2
+set pageText to do JavaScript "document.body.innerText" in front document
+if pageText contains "Success" then
+  -- 操作成功完成
+else
+  -- 处理失败情况
+end if
+```
+
+## 最佳实践
+
+1. **始终首先激活 Safari**
+   - 确保 Safari 在自动化前位于最前台
+   - 防止与错误的应用程序交互
+
+2. **使用 Try 块增强韧性**
+   ```applescript
+   try
+     -- 自动化代码在这里
+   on error errMsg
+     display dialog "自动化失败: " & errMsg
+   end try
+   ```
+
+3. **返回值用于调试**
+   ```applescript
+   set elementFound to do JavaScript "return document.querySelector('.my-class') !== null;"
+   if elementFound then
+     -- 元素存在，继续
+   end if
+   ```
+
+4. **处理动态内容**
+   - 使用 XPath 进行基于文本的选择
+   - 为异步内容实现重试逻辑
+   - 对基于组件的 UI 考虑 Shadow DOM
+
+## 常见陷阱
+
+1. **引号转义问题**
+   - AppleScript 解析错误 (-2741) 通常表示引号问题
+   - 对复杂字符串使用 `character id 39` 技术
+
+2. **时序问题**
+   - 页面加载后延迟不足
+   - 未等待异步操作完成
+
+3. **Shadow DOM 盲点**
+   - 标准选择器无法找到 shadow DOM 元素
+   - 需要专门的遍历函数
+
+4. **进程识别**
+   - 应用程序的进程名可能与预期不同
+   - 尽可能使用 bundle 标识符
+
+## 与其他工具的集成
+
+### 终端集成
+```applescript
+-- 示例：在 Safari 自动化前启动 Web 服务器
+tell application "Terminal"
+  activate
+  do script "cd /path/to/project && npm start"
+end tell
+delay 5 -- 服务器启动的策略性延迟
+
+-- 然后继续 Safari 自动化
+```
+
+### 截图捕获
+```applescript
+-- 自动化后捕获 Safari 窗口
+tell application "System Events"
+  tell process "Safari"
+    set frontWindow to window 1
+    set {xPosition, yPosition} to position of frontWindow
+    set {windowWidth, windowHeight} to size of frontWindow
+  end tell
+end tell
+
+do shell script "screencapture -R" & xPosition & "," & yPosition & "," & windowWidth & "," & windowHeight & " ~/Desktop/safari-result.png"
+```
+
+本指南提供了可重用的 Safari 自动化模式，可适应各种 Web 测试和自动化场景。

@@ -40,6 +40,7 @@ Actionable rules for AI assistants to follow during development:
 - **[mcp-inspector-debugging.mdc](./project-rules/mcp-inspector-debugging.mdc)** - Debugging MCP servers with Inspector UI
 - **[safari-automation.mdc](./project-rules/safari-automation.mdc)** - Advanced Safari browser automation techniques
 - **[screenshot-automation.mdc](./project-rules/screenshot-automation.mdc)** - AppleScript patterns for automated screenshots
+- **[update-docs.mdc](./project-rules/update-docs.mdc)** - Systematic documentation update and maintenance workflow
 
 **Language-Specific**
 - **[modern-swift.mdc](./project-rules/modern-swift.mdc)** - Modern SwiftUI architecture following Apple's latest best practices (Inspired by [Dimillian's "Forget MVVM"](https://dimillian.medium.com/swiftui-in-2025-forget-mvvm-262ff2bbd2ed))
@@ -53,6 +54,12 @@ Reference documentation and knowledge bases:
   - [swift-testing-playbook.mdc](./docs/swift-testing-playbook.mdc) - Comprehensive guide for migrating to Swift Testing
   - [swift-argument-parser.mdc](./docs/swift-argument-parser.mdc) - Swift Argument Parser framework documentation
   - [swift6-migration.mdc](./docs/swift6-migration.mdc) - Guide for migrating to Swift 6 with concurrency
+  - [swift-concurrency.md](./docs/swift-concurrency.md) - Swift Concurrency documentation and best practices
+  - [swiftui.md](./docs/swiftui.md) - SwiftUI framework documentation and patterns
+  - [swiftdata.md](./docs/swiftdata.md) - SwiftData framework documentation
+  - [modern-swift.md](./docs/modern-swift.md) - Modern Swift development patterns
+  - [appkit.md](./docs/appkit.md) - AppKit framework documentation
+  - [uikit.md](./docs/uikit.md) - UIKit framework documentation
 
 - **MCP Development**
   - [mcp-best-practices.mdc](./docs/mcp-best-practices.mdc) - Best practices for building Model Context Protocol servers
@@ -62,9 +69,11 @@ Reference documentation and knowledge bases:
 Global Claude Code configuration and automation scripts (place in `~/.claude/CLAUDE.md`):
 - **[github-issue-creation.mdc](./global-rules/github-issue-creation.mdc)** - Creating well-structured GitHub issues (Credit: [@nityeshaga](https://x.com/nityeshaga/status/1933113428379574367))
 - **[mcp-peekaboo-setup.mdc](./global-rules/mcp-peekaboo-setup.mdc)** - Setup guide for Peekaboo vision-enabled MCP server
+- **[steipete-mcps.md](./global-rules/steipete-mcps.md)** - Comprehensive MCP server installation guide for multiple IDEs
 - **[terminal-title-wrapper.zsh](./global-rules/terminal-title-wrapper.zsh)** - ZSH wrapper for dynamic terminal titles
 - **[mcp-sync.sh](./global-rules/mcp-sync.sh)** - Script to sync MCP servers across Claude installations
 - **[mcp-sync-rule.md](./global-rules/mcp-sync-rule.md)** - Documentation for MCP sync functionality
+- **[setup-mcps.sh](./global-rules/setup-mcps.sh)** - Automated MCP server setup script
 
 ## Usage
 

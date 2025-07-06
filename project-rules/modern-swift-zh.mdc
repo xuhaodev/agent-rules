@@ -1,0 +1,165 @@
+# 现代 Swift 开发
+
+编写遵循 Apple 最新架构建议和最佳实践的惯用 SwiftUI 代码。
+
+## 核心理念
+
+- SwiftUI 是 Apple 平台的默认 UI 范式 - 拥抱其声明式特性
+- 避免传统的 UIKit 模式和不必要的抽象
+- 专注于简洁、清晰和原生数据流
+- 让 SwiftUI 处理复杂性 - 不要与框架对抗
+
+## 架构指南
+
+### 1. 拥抱原生状态管理
+
+适当使用 SwiftUI 的内置属性包装器：
+- `@State` - 本地的、临时的视图状态
+- `@Binding` - 视图间的双向数据流
+- `@Observable` - 共享状态 (iOS 17+)
+- `@ObservableObject` - 传统共享状态 (iOS 17 之前)
+- `@Environment` - 应用范围关注点的依赖注入
+
+### 2. 状态所有权原则
+
+- 除非需要共享，否则视图拥有其本地状态
+- 状态向下流动，操作向上流动
+- 将状态保持在尽可能接近使用位置的地方
+- 仅在多个视图需要时才提取共享状态
+
+### 3. 现代异步模式
+
+- 使用 `async/await` 作为异步操作的默认选择
+- 利用 `.task` 修饰符进行生命周期感知的异步工作
+- 除非绝对必要，否则避免使用 Combine
+- 使用 try/catch 优雅地处理错误
+
+### 4. 视图组合
+
+- 使用小型、专注的视图构建 UI
+- 自然地提取可重用组件
+- 使用视图修饰符封装通用样式
+- 偏向组合而非继承
+
+### 5. 代码组织
+
+- 按功能组织，而非按类型（避免 Views/、Models/、ViewModels/ 文件夹）
+- 在适当时将相关代码保持在同一文件中
+- 使用扩展来组织大型文件
+- 始终遵循 Swift 命名约定
+
+## 实现模式
+
+### 简单状态示例
+```swift
+struct CounterView: View {
+    @State private var count = 0
+    
+    var body: some View {
+        VStack {
+            Text("Count: \(count)")
+            Button("Increment") { 
+                count += 1 
+            }
+        }
+    }
+}
+```
+
+### 使用 @Observable 的共享状态
+```swift
+@Observable
+class UserSession {
+    var isAuthenticated = false
+    var currentUser: User?
+    
+    func signIn(user: User) {
+        currentUser = user
+        isAuthenticated = true
+    }
+}
+
+struct MyApp: App {
+    @State private var session = UserSession()
+    
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+                .environment(session)
+        }
+    }
+}
+```
+
+### 异步数据加载
+```swift
+struct ProfileView: View {
+    @State private var profile: Profile?
+    @State private var isLoading = false
+    @State private var error: Error?
+    
+    var body: some View {
+        Group {
+            if isLoading {
+                ProgressView()
+            } else if let profile {
+                ProfileContent(profile: profile)
+            } else if let error {
+                ErrorView(error: error)
+            }
+        }
+        .task {
+            await loadProfile()
+        }
+    }
+    
+    private func loadProfile() async {
+        isLoading = true
+        defer { isLoading = false }
+        
+        do {
+            profile = try await ProfileService.fetch()
+        } catch {
+            self.error = error
+        }
+    }
+}
+```
+
+## 最佳实践
+
+### 推荐做法：
+- 尽可能编写自包含的视图
+- 按 Apple 的意图使用属性包装器
+- 独立测试逻辑，可视化地预览 UI
+- 明确处理加载和错误状态
+- 保持视图专注于展示
+- 使用 Swift 的类型系统确保安全
+
+### 不推荐做法：
+- 为每个视图创建 ViewModels
+- 不必要地将状态移出视图
+- 添加没有明确益处的抽象层
+- 对简单异步操作使用 Combine
+- 与 SwiftUI 的更新机制对抗
+- 过度复杂化简单功能
+
+## 测试策略
+
+- 对业务逻辑和数据转换进行单元测试
+- 使用 SwiftUI Previews 进行视觉测试
+- 独立测试 @Observable 类
+- 保持测试简单和专注
+- 不要为了可测试性而牺牲代码清晰度
+
+## 现代 Swift 特性
+
+- 使用 Swift 并发 (async/await, actors)
+- 在可用时利用 Swift 6 数据竞争安全
+- 有效利用属性包装器
+- 在适当的地方拥抱值类型
+- 使用协议进行抽象，而不仅仅是为了测试
+
+## 总结
+
+编写看起来和感觉像 SwiftUI 的 SwiftUI 代码。该框架已经显著成熟 - 信任其模式和工具。专注于解决用户问题，而不是实现来自其他平台的架构模式。

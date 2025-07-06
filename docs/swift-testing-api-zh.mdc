@@ -1,0 +1,504 @@
+---
+description: 用于在 Swift 包中创建和运行测试的 Swift Testing 框架 API 文档
+globs: "**/*Tests.swift, **/*Test.swift"
+alwaysApply: false
+---
+
+# https://developer.apple.com/documentation/testing llms-full.txt
+
+## Swift Testing 概述
+[跳过导航](https://developer.apple.com/documentation/testing#app-main)
+
+框架
+
+# Swift Testing
+
+为您的 Swift 包和 Xcode 项目创建和运行测试。
+
+Swift 6.0+Xcode 16.0+
+
+## [概述](https://developer.apple.com/documentation/testing\#Overview)
+
+![在蓝色渐变背景上的 Swift 标志，包含函数、数字、标签和勾选标记菱形符号。](https://docs-assets.developer.apple.com/published/bb0ec39fe3198b15d431887aac09a527/swift-testing-hero%402x.png)
+
+使用 Swift Testing，您可以利用 Swift 编程语言的强大和表达能力，以更少的代码和更高的信心开发测试。该库与 Swift Package Manager 测试工作流程无缝集成，支持灵活的测试组织、可自定义的元数据和可扩展的测试执行。
+
+- 使用单个属性几乎在任何地方定义测试函数。
+
+- 使用 Swift 的类型系统将相关测试分组到层次结构中。
+
+- 与 Swift 并发无缝集成。
+
+- 在广泛的输入范围内对测试函数进行参数化。
+
+- 根据运行时条件动态启用测试。
+
+- 在进程内并行化测试。
+
+- 使用标签对测试进行分类。
+
+- 将错误直接与验证其修复或重现其问题的测试关联。
+
+
+#### [相关视频](https://developer.apple.com/documentation/testing\#Related-videos)
+
+[![](https://devimages-cdn.apple.com/wwdc-services/images/C03E6E6D-A32A-41D0-9E50-C3C6059820AA/E94A25C1-8734-483C-A4C1-862533C307AC/9309_wide_250x141_3x.jpg)\\
+\\
+认识 Swift Testing](https://developer.apple.com/videos/play/wwdc2024/10179)
+
+[![](https://devimages-cdn.apple.com/wwdc-services/images/C03E6E6D-A32A-41D0-9E50-C3C6059820AA/52DB5AB3-48AF-40E1-98C7-CCC9132EDD39/9325_wide_250x141_3x.jpg)\\
+\\
+深入了解 Swift Testing](https://developer.apple.com/videos/play/wwdc2024/10195)
+
+## [主题](https://developer.apple.com/documentation/testing\#topics)
+
+### [基础](https://developer.apple.com/documentation/testing\#Essentials)
+
+[定义测试函数](https://developer.apple.com/documentation/testing/definingtests)
+
+定义测试函数以验证代码是否正常工作。
+
+[使用套件类型组织测试函数](https://developer.apple.com/documentation/testing/organizingtests)
+
+将测试组织到测试套件中。
+
+[从 XCTest 迁移测试](https://developer.apple.com/documentation/testing/migratingfromxctest)
+
+迁移使用 XCTest 编写的现有测试方法或测试类。
+
+[`macro Test(String?, any TestTrait...)`](https://developer.apple.com/documentation/testing/test(_:_:))
+
+声明一个测试。
+
+[`struct Test`](https://developer.apple.com/documentation/testing/test)
+
+表示测试或套件的类型。
+
+[`macro Suite(String?, any SuiteTrait...)`](https://developer.apple.com/documentation/testing/suite(_:_:))
+
+声明一个测试套件。
+
+### [测试参数化](https://developer.apple.com/documentation/testing\#Test-parameterization)
+
+[实现参数化测试](https://developer.apple.com/documentation/testing/parameterizedtesting)
+
+指定不同的输入参数，从测试函数生成多个测试用例。
+
+[`macro Test<C>(String?, any TestTrait..., arguments: C)`](https://developer.apple.com/documentation/testing/test(_:_:arguments:)-8kn7a)
+
+声明在值集合上参数化的测试。
+
+[`macro Test<C1, C2>(String?, any TestTrait..., arguments: C1, C2)`](https://developer.apple.com/documentation/testing/test(_:_:arguments:_:))
+
+声明在两个值集合上参数化的测试。
+
+[`macro Test<C1, C2>(String?, any TestTrait..., arguments: Zip2Sequence<C1, C2>)`](https://developer.apple.com/documentation/testing/test(_:_:arguments:)-3rzok)
+
+声明在两个压缩值集合上参数化的测试。
+
+[`protocol CustomTestArgumentEncodable`](https://developer.apple.com/documentation/testing/customtestargumentencodable)
+
+用于自定义传递给参数化测试的参数编码方式的协议，用于在运行特定参数时进行匹配。
+
+[`struct Case`](https://developer.apple.com/documentation/testing/test/case)
+
+来自参数化 [`Test`](https://developer.apple.com/documentation/testing/test) 的单个测试用例。
+
+### [行为验证](https://developer.apple.com/documentation/testing\#Behavior-validation)
+
+[API 参考\\
+期望和确认](https://developer.apple.com/documentation/testing/expectations)
+
+在测试中检查预期值、结果和异步事件。
+
+[API 参考\\
+已知问题](https://developer.apple.com/documentation/testing/known-issues)
+
+在运行测试时突出显示已知问题。
+
+### [测试自定义](https://developer.apple.com/documentation/testing\#Test-customization)
+
+[API 参考\\
+特性](https://developer.apple.com/documentation/testing/traits)
+
+注释测试函数和套件，并自定义其行为。
+
+当前页面是 Swift Testing
+
+## 为测试添加标签
+[跳过导航](https://developer.apple.com/documentation/testing/addingtags#app-main)
+
+- [Swift Testing](https://developer.apple.com/documentation/testing)
+- [特性](https://developer.apple.com/documentation/testing/traits)
+- 为测试添加标签
+
+文章
+
+# 为测试添加标签
+
+使用标签为组织、过滤和自定义外观提供语义信息。
+
+## [概述](https://developer.apple.com/documentation/testing/addingtags\#Overview)
+
+复杂的包或项目可能包含数百或数千个测试和套件。这些测试的某些子集可能共享某些共同方面，例如是_关键的_或_不稳定的_。测试库包含一种称为_标签_的特性类型，您可以添加这种特性来分组和分类测试。
+
+标签与测试套件不同：测试套件在源级别对测试函数施加结构，而标签为测试提供语义信息，可以与跨测试套件、源文件甚至测试目标的任意数量的其他测试共享。
+
+## [添加标签](https://developer.apple.com/documentation/testing/addingtags\#Add-a-tag)
+
+要向测试添加标签，请使用 [`tags(_:)`](https://developer.apple.com/documentation/testing/trait/tags(_:)) 特性。此特性将标签序列作为其参数，然后在运行时将这些标签应用于相应的测试。如果任何标签应用于测试套件，则该套件中的所有测试都会继承这些标签。
+
+测试库不为任何标签分配任何语义含义，标签的存在或缺失也不会影响测试库如何运行测试。
+
+标签本身是 [`Tag`](https://developer.apple.com/documentation/testing/tag) 的实例，表示为声明为 [`Tag`](https://developer.apple.com/documentation/testing/tag) 静态成员的命名常量。要声明命名常量标签，请使用 [`Tag()`](https://developer.apple.com/documentation/testing/tag()) 宏：
+
+```
+extension Tag {
+  @Tag static var legallyRequired: Self
+}
+
+@Test("供应商许可证有效", .tags(.legallyRequired))
+func licenseValid() { ... }
+
+```
+
+如果在不同文件、模块或其他上下文中声明两个同名的标签（上例中的 `legallyRequired`），测试库会将它们视为等价的。
+
+如果一个标签需要与包或项目（或其依赖项）中其他地方声明的类似标签区分开来，请使用反向 DNS 命名为您的标签创建唯一的 Swift 符号名称：
+
+```
+extension Tag {
+  enum com_example_foodtruck {}
+}
+
+extension Tag.com_example_foodtruck {
+  @Tag static var extraSpecial: Tag
+}
+
+@Test(
+  "Extra Special Sauce 配方是秘密",
+  .tags(.com_example_foodtruck.extraSpecial)
+)
+func secretSauce() { ... }
+
+```
+
+### [标签可以声明的位置](https://developer.apple.com/documentation/testing/addingtags\#Where-tags-can-be-declared)
+
+标签必须始终在 [`Tag`](https://developer.apple.com/documentation/testing/tag) 的扩展中或在 [`Tag`](https://developer.apple.com/documentation/testing/tag) 内嵌套的类型中声明为 [`Tag`](https://developer.apple.com/documentation/testing/tag) 的成员。以第二个名称重新声明标签没有效果，附加名称不会被测试库在运行时识别。以下示例不受支持：
+
+```
+extension Tag {
+  @Tag static var legallyRequired: Self // ✅ 正确：声明新标签。
+
+  static var requiredByLaw: Self { // ❌ 错误：此标签名称在运行时
+                                   // 不会被识别。
+    legallyRequired
+  }
+}
+
+```
+
+如果标签被声明为 [`Tag`](https://developer.apple.com/documentation/testing/tag) 类型扩展之外的命名常量（例如，在文件根部或在另一个不相关的类型声明中），它就不能应用于测试函数或测试套件。以下声明不受支持：
+
+```
+@Tag let needsKetchup: Self // ❌ 错误：标签必须在 Tag 的扩展中声明。
+                            
+struct Food {
+  @Tag var needsMustard: Self // ❌ 错误：标签必须在 Tag 的扩展中声明。
+                              
+}
+
+```
+
+## [另见](https://developer.apple.com/documentation/testing/addingtags\#see-also)
+
+### [注释测试](https://developer.apple.com/documentation/testing/addingtags\#Annotating-tests)
+
+[为测试添加注释](https://developer.apple.com/documentation/testing/addingcomments)
+
+添加注释以提供有关测试的有用信息。
+
+[将错误与测试关联](https://developer.apple.com/documentation/testing/associatingbugs)
+
+将测试发现或验证的错误关联起来。
+
+[解释错误标识符](https://developer.apple.com/documentation/testing/bugidentifiers)
+
+检查测试库如何解释开发者提供的错误标识符。
+
+[`macro Tag()`](https://developer.apple.com/documentation/testing/tag())
+
+声明可以应用于测试函数或测试套件的标签。
+
+[`static func bug(String, Comment?) -> Self`](https://developer.apple.com/documentation/testing/trait/bug(_:_:))
+
+构造要与测试跟踪的错误。
+
+[`static func bug(String?, id: String, Comment?) -> Self`](https://developer.apple.com/documentation/testing/trait/bug(_:id:_:)-10yf5)
+
+构造要与测试跟踪的错误。
+
+[`static func bug(String?, id: some Numeric, Comment?) -> Self`](https://developer.apple.com/documentation/testing/trait/bug(_:id:_:)-3vtpl)
+
+构造要与测试跟踪的错误。
+
+当前页面是为测试添加标签
+
+## 定义测试函数
+[跳过导航](https://developer.apple.com/documentation/testing/definingtests#app-main)
+
+- [Swift Testing](https://developer.apple.com/documentation/testing)
+- 定义测试函数
+
+文章
+
+# 定义测试函数
+
+定义测试函数以验证代码是否正常工作。
+
+## [概述](https://developer.apple.com/documentation/testing/definingtests\#Overview)
+
+为 Swift 包或项目定义测试函数很简单。
+
+### [导入测试库](https://developer.apple.com/documentation/testing/definingtests\#Import-the-testing-library)
+
+要导入测试库，请将以下内容添加到包含测试的 Swift 源文件中：
+
+```
+import Testing
+
+```
+
+### [声明测试函数](https://developer.apple.com/documentation/testing/definingtests\#Declare-a-test-function)
+
+要声明测试函数，请编写一个不带任何参数的 Swift 函数声明，然后在其名称前添加 `@Test` 属性：
+
+```
+@Test func foodTruckExists() {
+  // 测试逻辑在这里。
+}
+
+```
+
+此测试函数可以存在于文件作用域或类型内。包含测试函数的类型自动成为_测试套件_，可以选择使用 `@Suite` 属性进行注释。有关套件的更多信息，请参见[使用套件类型组织测试函数](https://developer.apple.com/documentation/testing/organizingtests)。
+
+请注意，虽然这个函数是一个有效的测试函数，但它实际上并不执行任何操作或测试任何代码。要在测试函数中检查预期值和结果，请向测试函数添加[期望](https://developer.apple.com/documentation/testing/expectations)。
+
+### [自定义测试名称](https://developer.apple.com/documentation/testing/definingtests\#Customize-a-tests-name)
+
+要自定义测试函数在 IDE 或命令行中呈现的名称，请向 `@Test` 属性提供字符串字面量作为参数：
+
+```
+@Test("Food truck exists") func foodTruckExists() { ... }
+
+```
+
+要进一步自定义测试函数的外观和行为，请使用[特性](https://developer.apple.com/documentation/testing/traits)，如 [`tags(_:)`](https://developer.apple.com/documentation/testing/trait/tags(_:))。
+
+### [编写并发或抛出测试](https://developer.apple.com/documentation/testing/definingtests\#Write-concurrent-or-throwing-tests)
+
+与其他 Swift 函数一样，测试函数可以标记为 `async` 和 `throws`，分别注释为并发或抛出。如果测试只能在主 actor 的执行上下文中安全运行（即从进程的主线程），可以注释为 `@MainActor`：
+
+```
+@Test @MainActor func foodTruckExists() async throws { ... }
+
+```
+
+### [限制测试的可用性](https://developer.apple.com/documentation/testing/definingtests\#Limit-the-availability-of-a-test)
+
+如果测试函数只能在较新版本的操作系统或 Swift 语言上运行，请在声明时使用 `@available` 属性。使用 `@available` 属性的 `message` 参数来指定如果由于可用性限制而无法运行测试时要记录的消息：
+
+```
+@available(macOS 11.0, *)
+@available(swift, introduced: 8.0, message: "需要 Swift 8.0 功能才能运行")
+@Test func foodTruckExists() { ... }
+
+```
+
+## [另见](https://developer.apple.com/documentation/testing/definingtests\#see-also)
+
+### [基础](https://developer.apple.com/documentation/testing/definingtests\#Essentials)
+
+[使用套件类型组织测试函数](https://developer.apple.com/documentation/testing/organizingtests)
+
+将测试组织到测试套件中。
+
+[从 XCTest 迁移测试](https://developer.apple.com/documentation/testing/migratingfromxctest)
+
+迁移使用 XCTest 编写的现有测试方法或测试类。
+
+[`macro Test(String?, any TestTrait...)`](https://developer.apple.com/documentation/testing/test(_:_:))
+
+声明一个测试。
+
+[`struct Test`](https://developer.apple.com/documentation/testing/test)
+
+表示测试或套件的类型。
+
+[`macro Suite(String?, any SuiteTrait...)`](https://developer.apple.com/documentation/testing/suite(_:_:))
+
+声明一个测试套件。
+
+当前页面是定义测试函数
+
+## 实现参数化测试
+[跳过导航](https://developer.apple.com/documentation/testing/parameterizedtesting#app-main)
+
+- [Swift Testing](https://developer.apple.com/documentation/testing)
+- 实现参数化测试
+
+文章
+
+# 实现参数化测试
+
+指定不同的输入参数，从测试函数生成多个测试用例。
+
+## [概述](https://developer.apple.com/documentation/testing/parameterizedtesting\#Overview)
+
+某些测试需要在许多不同的输入上运行。例如，测试可能需要验证枚举的所有情况。测试库允许开发者指定一个或多个在测试期间要迭代的集合，这些集合的元素被转发到测试函数。使用特定参数值集调用测试函数称为测试_用例_。
+
+默认情况下，测试函数的测试用例彼此并行运行。有关测试并行化的更多信息，请参见[串行或并行运行测试](https://developer.apple.com/documentation/testing/parallelization)。
+
+### [在值数组上参数化](https://developer.apple.com/documentation/testing/parameterizedtesting\#Parameterize-over-an-array-of-values)
+
+通常想要在包含应该测试的值的数组上运行测试 _n_ 次。考虑以下测试函数：
+
+```
+enum Food {
+  case burger, iceCream, burrito, noodleBowl, kebab
+}
+
+@Test("所有食物可用")
+func foodsAvailable() async throws {
+  for food: Food in [.burger, .iceCream, .burrito, .noodleBowl, .kebab] {
+    let foodTruck = FoodTruck(selling: food)
+    #expect(await foodTruck.cook(food))
+  }
+}
+
+```
+
+如果此测试函数对数组中的某个值失败，可能不清楚哪个值失败了。相反，测试函数可以在各种输入上进行_参数化_：
+
+```
+enum Food {
+  case burger, iceCream, burrito, noodleBowl, kebab
+}
+
+@Test("所有食物可用", arguments: [Food.burger, .iceCream, .burrito, .noodleBowl, .kebab])
+func foodAvailable(_ food: Food) async throws {
+  let foodTruck = FoodTruck(selling: food)
+  #expect(await foodTruck.cook(food))
+}
+
+```
+
+当向 `@Test` 属性传递集合进行参数化时，测试库将集合中的每个元素逐一传递给测试函数作为其第一个（也是唯一的）参数。然后，如果测试对一个或多个输入失败，相应的诊断可以清楚地指示要检查哪些输入。
+
+### [在枚举情况上参数化](https://developer.apple.com/documentation/testing/parameterizedtesting\#Parameterize-over-the-cases-of-an-enumeration)
+
+前面的示例包含要测试的 `Food` 情况的硬编码列表。如果 `Food` 是符合 `CaseIterable` 的枚举，您可以改写为：
+
+```
+enum Food: CaseIterable {
+  case burger, iceCream, burrito, noodleBowl, kebab
+}
+
+@Test("所有食物可用", arguments: Food.allCases)
+func foodAvailable(_ food: Food) async throws {
+  let foodTruck = FoodTruck(selling: food)
+  #expect(await foodTruck.cook(food))
+}
+
+```
+
+这样，如果向 `Food` 枚举添加新情况，此函数会自动测试它。
+
+### [在整数范围上参数化](https://developer.apple.com/documentation/testing/parameterizedtesting\#Parameterize-over-a-range-of-integers)
+
+可以在封闭的整数范围上参数化测试函数：
+
+```
+@Test("可以制作大订单", arguments: 1 ... 100)
+func makeLargeOrder(count: Int) async throws {
+  let foodTruck = FoodTruck(selling: .burger)
+  #expect(await foodTruck.cook(.burger, quantity: count))
+}
+
+```
+
+### [使用多个集合进行测试](https://developer.apple.com/documentation/testing/parameterizedtesting\#Test-with-more-than-one-collection)
+
+可以测试多个集合。考虑以下测试函数：
+
+```
+@Test("可以制作大订单", arguments: Food.allCases, 1 ... 100)
+func makeLargeOrder(of food: Food, count: Int) async throws {
+  let foodTruck = FoodTruck(selling: food)
+  #expect(await foodTruck.cook(food, quantity: count))
+}
+
+```
+
+第一个集合的元素作为第一个参数传递给测试函数，第二个集合的元素作为第二个参数传递，以此类推。
+
+假设 `Food` 枚举有五种情况，此测试函数在运行时将被调用 500 次（5 x 100），包含食物和订单大小的每种可能组合。这些组合称为集合的笛卡尔积。
+
+要避免上面显示的组合语义，请使用 [`zip()`](https://developer.apple.com/documentation/swift/zip(_:_:))：
+
+```
+@Test("可以制作大订单", arguments: zip(Food.allCases, 1 ... 100))
+func makeLargeOrder(of food: Food, count: Int) async throws {
+  let foodTruck = FoodTruck(selling: food)
+  #expect(await foodTruck.cook(food, quantity: count))
+}
+
+```
+
+压缩序列将自动"解构"为两个参数，然后传递给测试函数进行评估。
+
+这个修改后的测试函数对压缩序列中的每个元组调用一次，总共五次调用而不是 500 次调用。换句话说，此测试函数传递输入 `(.burger, 1)`、`(.iceCream, 2)`、...、`(.kebab, 5)` 而不是 `(.burger, 1)`、`(.burger, 2)`、`(.burger, 3)`、...、`(.kebab, 99)`、`(.kebab, 100)`。
+
+### [运行选定的测试用例](https://developer.apple.com/documentation/testing/parameterizedtesting\#Run-selected-test-cases)
+
+如果参数化测试满足某些要求，测试库允许人们运行它包含的特定测试用例。这在测试有许多用例但只有一些失败时很有用，因为它可以重新运行和调试失败的用例而不受其他用例干扰。
+
+要支持运行选定的测试用例，必须能够确定性地匹配测试用例的参数。当有人尝试运行参数化测试函数的选定测试用例时，测试库评估测试用例的每个参数是否符合几个已知协议，如果测试用例的所有参数都符合这些协议之一，则该测试用例可以选择性地运行。以下按优先级顺序（从高到低）列出已知协议：
+
+1. [`CustomTestArgumentEncodable`](https://developer.apple.com/documentation/testing/customtestargumentencodable)
+
+2. `RawRepresentable`，其中 `RawValue` 符合 `Encodable`
+
+3. `Encodable`
+
+4. `Identifiable`，其中 `ID` 符合 `Encodable`
+
+
+如果测试用例的任何参数不满足上述要求之一，则整个测试用例无法选择性运行。
+
+## [另见](https://developer.apple.com/documentation/testing/parameterizedtesting\#see-also)
+
+### [测试参数化](https://developer.apple.com/documentation/testing/parameterizedtesting\#Test-parameterization)
+
+[`macro Test<C>(String?, any TestTrait..., arguments: C)`](https://developer.apple.com/documentation/testing/test(_:_:arguments:)-8kn7a)
+
+声明在值集合上参数化的测试。
+
+[`macro Test<C1, C2>(String?, any TestTrait..., arguments: C1, C2)`](https://developer.apple.com/documentation/testing/test(_:_:arguments:_:))
+
+声明在两个值集合上参数化的测试。
+
+[`macro Test<C1, C2>(String?, any TestTrait..., arguments: Zip2Sequence<C1, C2>)`](https://developer.apple.com/documentation/testing/test(_:_:arguments:)-3rzok)
+
+声明在两个压缩值集合上参数化的测试。
+
+[`protocol CustomTestArgumentEncodable`](https://developer.apple.com/documentation/testing/customtestargumentencodable)
+
+用于自定义传递给参数化测试的参数编码方式的协议，用于在运行特定参数时进行匹配。
+
+[`struct Case`](https://developer.apple.com/documentation/testing/test/case)
+
+来自参数化 [`Test`](https://developer.apple.com/documentation/testing/test) 的单个测试用例。
+
+当前页面是实现参数化测试

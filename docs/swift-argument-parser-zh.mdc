@@ -1,0 +1,400 @@
+---
+description: 用于命令行工具的 Swift Argument Parser 文档和使用模式
+globs: "**/*.swift"
+alwaysApply: false
+---
+
+# https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser llms-full.txt
+
+## Swift Argument Parser
+[跳过导航](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser#app-main)
+
+框架
+
+# ArgumentParser
+
+Swift 的直接、类型安全的参数解析。
+
+## [概述](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser\#Overview)
+
+通过使用 `ArgumentParser`，您可以通过声明简单的 Swift 类型来创建命令行界面工具。首先声明一个类型，定义您需要从命令行收集的信息。用 `ArgumentParser` 的属性包装器装饰每个存储属性，声明对 [`ParsableCommand`](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/parsablecommand) 的符合性，并在其 `run()` 方法中实现您的命令逻辑。对于 `run` 的 `async` 版本，请声明 [`AsyncParsableCommand`](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/asyncparsablecommand) 符合性。
+
+```
+import ArgumentParser
+
+@main
+struct Repeat: ParsableCommand {
+    @Argument(help: "要重复的短语。")
+    var phrase: String
+
+    @Option(help: "重复 'phrase' 的次数。")
+    var count: Int? = nil
+
+    mutating func run() throws {
+        let repeatCount = count ?? 2
+        for _ in 0..<repeatCount {
+            print(phrase)
+        }
+    }
+}
+
+```
+
+当用户执行您的命令时，`ArgumentParser` 库解析命令行参数，实例化您的命令类型，然后调用您的 `run()` 方法或以有用的消息退出。
+
+![上面声明的 Repeat 命令的输出。](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/images/ArgumentParser/repeat.png)
+
+#### [其他资源](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser\#Additional-Resources)
+
+- [`ArgumentParser` 在 GitHub](https://github.com/apple/swift-argument-parser/)
+
+- [`ArgumentParser` 在 Swift 论坛](https://forums.swift.org/c/related-projects/argumentparser/60)
+
+
+## [主题](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser\#topics)
+
+### [基础](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser\#Essentials)
+
+[ArgumentParser 入门](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/gettingstarted)
+
+学习设置和自定义简单的命令行工具。
+
+[`protocol ParsableCommand`](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/parsablecommand)
+
+可以作为嵌套命令树的一部分执行的类型。
+
+[`protocol AsyncParsableCommand`](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/asyncparsablecommand)
+
+可以异步执行的类型，作为嵌套命令树的一部分。
+
+[定义命令和子命令](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/commandsandsubcommands)
+
+将复杂的命令行工具分解为子命令树。
+
+[自定义命令帮助](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/customizingcommandhelp)
+
+定义您的命令的摘要、扩展讨论或使用字符串，并设置用于调用帮助显示的标志。
+
+### [参数、选项和标志](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser\#Arguments-Options-and-Flags)
+
+[声明参数、选项和标志](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/declaringarguments)
+
+使用 `@Argument`、`@Option` 和 `@Flag` 属性包装器为您的命令声明命令行界面。
+
+[`struct Argument`](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/argument)
+
+表示位置命令行参数的属性包装器。
+
+[`struct Option`](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/option)
+
+表示命令行选项的属性包装器。
+
+[`struct Flag`](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/flag)
+
+表示命令行标志的属性包装器。
+
+[`struct OptionGroup`](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/optiongroup)
+
+透明包含可解析类型的包装器。
+
+[`protocol ParsableArguments`](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/parsablearguments)
+
+可以从程序的命令行参数解析的类型。
+
+### [属性自定义](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser\#Property-Customization)
+
+[自定义帮助](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/customizinghelp)
+
+通过为参数、选项和标志提供丰富的帮助来支持您的用户（和您自己）。
+
+[`struct ArgumentHelp`](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/argumenthelp)
+
+命令行参数的帮助信息。
+
+[`struct ArgumentVisibility`](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/argumentvisibility)
+
+参数帮助的可见性级别。
+
+[`struct NameSpecification`](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/namespecification)
+
+如何将属性表示为命令行参数标签的规范。
+
+### [自定义类型](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser\#Custom-Types)
+
+[`protocol ExpressibleByArgument`](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/expressiblebyargument)
+
+可以表示为命令行参数的类型。
+
+[`protocol EnumerableFlag`](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/enumerableflag)
+
+表示 `@Flag` 属性要使用的不同可能标志的类型。
+
+### [验证和错误](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser\#Validation-and-Errors)
+
+[提供自定义验证](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/validation)
+
+当出现问题时向用户提供有用的反馈。
+
+[`struct ValidationError`](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/validationerror)
+
+向用户呈现解析其命令行输入错误的错误类型。
+
+[`struct CleanExit`](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/cleanexit)
+
+表示实用程序干净（即非错误状态）退出的错误类型。
+
+[`struct ExitCode`](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/exitcode)
+
+仅包含退出代码的错误类型。
+
+### [Shell 补全脚本](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser\#Shell-Completion-Scripts)
+
+[生成和安装补全脚本](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/installingcompletionscripts)
+
+安装由您的命令行工具生成的 shell 补全脚本。
+
+[自定义补全](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/customizingcompletions)
+
+为您的命令行工具的参数和选项提供自定义 shell 补全。
+
+[`struct CompletionKind`](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/completionkind)
+
+用于参数或选项的补全类型。
+
+### [高级主题](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser\#Advanced-Topics)
+
+[手动解析和测试](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/manualparsing)
+
+提供您自己的命令行输入数组或直接使用解析的命令行参数。
+
+[实验性功能](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/experimentalfeatures)
+
+了解 ArgumentParser 的实验性功能。
+
+### [结构](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser\#Structures)
+
+[`struct CommandGroup`](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/commandgroup)
+
+在通用名称下分组的一组命令。
+
+### [扩展模块](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser\#Extended-Modules)
+
+[Swift](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/swift)
+
+- [ArgumentParser](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser#app-top)
+- [概述](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser#Overview)
+- [主题](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser#topics)
+
+当前页面是 ArgumentParser
+
+|
+|
+
+## 自定义补全
+[跳过导航](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/customizingcompletions#app-main)
+
+- [ArgumentParser](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser)
+- 自定义补全
+
+文章
+
+# 自定义补全
+
+为您的命令行工具的参数和选项提供自定义 shell 补全。
+
+## [概述](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/customizingcompletions\#Overview)
+
+`ArgumentParser` 为任何它能处理的类型提供默认补全。例如，一个 `CaseIterable` 类型的 `@Option` 属性将自动有正确的值作为补全建议。
+
+在声明选项或参数时，您可以通过指定 [`CompletionKind`](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/completionkind) 来自定义提供的补全。使用此补全类型，您可以指定值应该是文件、目录或字符串列表之一：
+
+```
+struct Example: ParsableCommand {
+    @Option(help: "要读取的文件。", completion: .file())
+    var input: String
+
+    @Option(help: "输出目录。", completion: .directory)
+    var outputDir: String
+
+    @Option(help: "首选文件格式。", completion: .list(["markdown", "rst"]))
+    var format: String
+
+    enum CompressionType: String, CaseIterable, ExpressibleByArgument {
+        case zip, gzip
+    }
+
+    @Option(help: "要使用的压缩类型。")
+    var compression: CompressionType
+}
+
+```
+
+生成的补全脚本将只为 `--input` 选项建议文件名，只为 `--output-dir` 建议目录名，只为 `--format` 建议字符串 `markdown` 和 `rst`。`--compression` 选项使用 `CaseIterable` 类型的默认补全，因此补全脚本将建议 `zip` 和 `gzip`。
+
+您可以通过实现 [`defaultCompletionKind`](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/expressiblebyargument/defaultcompletionkind) 为自定义 [`ExpressibleByArgument`](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/expressiblebyargument) 类型定义默认补全类型。例如，任何具有此 `File` 类型的参数或选项将自动使用文件进行补全：
+
+```
+struct File: Hashable, ExpressibleByArgument {
+    var path: String
+
+    init?(argument: String) {
+        self.path = argument
+    }
+
+    static var defaultCompletionKind: CompletionKind {
+        .file()
+    }
+}
+
+```
+
+为了对建议的补全进行更多控制，您可以通过使用 `.custom` 补全类型指定一个在补全期间将被调用的函数。
+
+```
+func listExecutables(_ arguments: [String]) -> [String] {
+    // 生成当前目录中可执行文件的列表
+}
+
+struct SwiftRun {
+    @Option(help: "要执行的目标。", completion: .custom(listExecutables))
+    var target: String?
+}
+
+```
+
+在此示例中，当用户请求 `--target` 选项的补全时，补全脚本使用特殊语法运行 `SwiftRun` 命令行工具，调用 `listExecutables` 函数，传入到目前为止给定的参数数组。
+
+## [另见](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/customizingcompletions\#see-also)
+
+### [Shell 补全脚本](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/customizingcompletions\#Shell-Completion-Scripts)
+
+[生成和安装补全脚本](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/installingcompletionscripts)
+
+安装由您的命令行工具生成的 shell 补全脚本。
+
+[`struct CompletionKind`](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/completionkind)
+
+用于参数或选项的补全类型。
+
+- [自定义补全](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/customizingcompletions#app-top)
+- [概述](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/customizingcompletions#Overview)
+- [另见](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/customizingcompletions#see-also)
+
+当前页面是自定义补全
+
+|
+|
+
+## OptionGroup 概述
+[跳过导航](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/optiongroup#app-main)
+
+- [ArgumentParser](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser)
+- OptionGroup
+
+结构
+
+# OptionGroup
+
+透明包含可解析类型的包装器。
+
+```
+@propertyWrapper
+struct OptionGroup<Value> where Value : ParsableArguments
+```
+
+[OptionGroup.swift](https://github.com/apple/swift-argument-parser/blob/1.5.1/Sources/ArgumentParser/Parsable%20Properties/OptionGroup.swift#L34 "打开 OptionGroup.swift 的源文件")
+
+## [概述](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/optiongroup\#overview)
+
+使用选项组来包含在可解析类型中声明的选项、标志或参数组。
+
+```
+struct GlobalOptions: ParsableArguments {
+    @Flag(name: .shortAndLong)
+    var verbose: Bool
+
+    @Argument var values: [Int]
+}
+
+struct Options: ParsableArguments {
+    @Option var name: String
+    @OptionGroup var globals: GlobalOptions
+}
+
+```
+
+作为 `GlobalOptions` 一部分声明的标志和位置参数在解析 `Options` 时被包含。
+
+## [主题](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/optiongroup\#topics)
+
+### [创建选项组](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/optiongroup\#Creating-an-Option-Group)
+
+[`init(title: String, visibility: ArgumentVisibility)`](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/optiongroup/init(title:visibility:))
+
+创建一个表示另一个可解析类型的属性，使用指定的标题和可见性。
+
+### [选项组属性](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/optiongroup\#Option-Group-Properties)
+
+[`var title: String`](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/optiongroup/title)
+
+在此选项组的帮助屏幕中使用的标题。
+
+### [不常用的 API](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/optiongroup\#Infrequently-Used-APIs)
+
+[`init()`](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/optiongroup/init())
+
+创建一个表示另一个可解析类型的属性。
+
+已弃用
+
+[`var wrappedValue: Value`](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/optiongroup/wrappedvalue)
+
+此属性包装器呈现的值。
+
+[`var description: String`](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/optiongroup/description)
+
+### [默认实现](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/optiongroup\#Default-Implementations)
+
+[API 参考\\
+CustomStringConvertible 实现](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/optiongroup/customstringconvertible-implementations)
+
+## [关系](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/optiongroup\#relationships)
+
+### [符合](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/optiongroup\#conforms-to)
+
+- `Swift.Copyable`
+- `Swift.CustomStringConvertible`
+- `Swift.Decodable`
+- `Swift.Sendable`
+
+## [另见](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/optiongroup\#see-also)
+
+### [参数、选项和标志](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/optiongroup\#Arguments-Options-and-Flags)
+
+[声明参数、选项和标志](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/declaringarguments)
+
+使用 `@Argument`、`@Option` 和 `@Flag` 属性包装器为您的命令声明命令行界面。
+
+[`struct Argument`](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/argument)
+
+表示位置命令行参数的属性包装器。
+
+[`struct Option`](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/option)
+
+表示命令行选项的属性包装器。
+
+[`struct Flag`](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/flag)
+
+表示命令行标志的属性包装器。
+
+[`protocol ParsableArguments`](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/parsablearguments)
+
+可以从程序的命令行参数解析的类型。
+
+- [OptionGroup](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/optiongroup#app-top)
+- [概述](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/optiongroup#overview)
+- [主题](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/optiongroup#topics)
+- [关系](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/optiongroup#relationships)
+- [另见](https://swiftpackageindex.com/apple/swift-argument-parser/1.5.1/documentation/argumentparser/optiongroup#see-also)
+
+当前页面是 OptionGroup

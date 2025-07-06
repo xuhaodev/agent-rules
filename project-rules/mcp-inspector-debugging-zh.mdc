@@ -1,0 +1,101 @@
+---
+description: 使用 MCP Inspector UI 调试和验证 MCP 服务器，配合 Playwright 自动化
+globs: "e2e/**/*.js, tests/**/*.js"
+alwaysApply: false
+---
+规则名称: mcp-inspector
+描述: 通过 MCP Inspector UI 调试和验证 MCP 服务器。该规则使用 Playwright 进行 UI 自动化，iTerm 进行服务器管理，Claude Code 进行日志检查。
+
+**注意:** 请将占位符替换为您的具体值：
+- `[MCP_SERVER_NAME]` - 您的 MCP 服务器名称
+- `[WORKSPACE_PATH]` - 项目的绝对路径
+- `[TEST_CREDENTIALS]` - 所需的测试凭据
+- `[CONFIG_FILE]` - 您的配置文件路径
+- `[LOG_FILE]` - 您的日志文件路径
+
+要读取日志，使用 `tail -n 100 /path/to/logfile.log`
+
+不要通过终端工具运行阻塞性终端命令。应该通过 AppleScript 使用 Terminal 应用。
+阻塞性操作包括：
+- `node dist/index.js`
+- `npm run dev`
+- `npm start`
+
+这是可以的：
+获取最后 X 行：`tail -n 100 server.log`
+
+运行 `npm run build` 来验证构建。
+
+当 MCP Inspector 失败时检查 iTerm 日志，因为它可能显示我们服务的错误。
+
+**必需的工具:**
+- `run_terminal_cmd` (用于全局 pkill，以及作为 Inspector 启动的后备)
+- `mcp_iterm-mcp_send_control_character`
+- `mcp_iterm-mcp_write_to_terminal`
+- `mcp_iterm-mcp_read_terminal_output`
+- `mcp_playwright_browser_navigate`
+- `mcp_playwright_browser_type`
+- `mcp_playwright_browser_click`
+- `mcp_playwright_browser_snapshot`
+- `mcp_playwright_browser_console_messages`
+- `mcp_playwright_browser_wait_for`
+- `mcp_claude-code_claude_code`
+
+**用户工作空间路径占位符:**
+- 此规则中的 `[WORKSPACE_PATH]` **必须** 由 AI 助手替换为用户当前项目工作空间的绝对路径（例如，从 `<user_info>` 中获取）。
+
+---
+
+**阶段 1: 启动 MCP Inspector 服务器 (通过 iTerm)**
+1.  **清除 iTerm 并终止现有的 Inspector 进程:**
+    *   操作: `mcp_iterm-mcp_send_control_character`, `letter`: `"C"`。(停止任何当前的 iTerm 命令)。
+2.  **在 iTerm 中启动新的 Inspector 进程:**
+    *   操作: `mcp_iterm-mcp_write_to_terminal`, `command`: `[ENV_VARS] npx @modelcontextprotocol/inspector ./start.sh`。
+    *   操作: `mcp_iterm-mcp_read_terminal_output`, `linesOfOutput`: `7` (或足够清楚地看到启动消息)。
+    *   验证: 查找 "MCP Inspector is up and running at http://127.0.0.1:6274"。注意代理端口。
+3.  **等待 Inspector UI:** `mcp_playwright_browser_wait_for`, `time`: `3` (秒)。
+
+**阶段 2: 通过 Playwright 连接到 MCP 服务器**
+1.  **导航/刷新 Inspector 页面:**
+    *   操作: `mcp_playwright_browser_navigate`, `url`: `http://127.0.0.1:6274`。
+    *   预期: 确保 Inspector UI 的新状态。
+    *   快照: 拍摄快照。
+2.  **填写连接表单:**
+    *   **设置命令:** (从快照中获取 "Command textbox" 的 `ref`)
+        *   操作: `mcp_playwright_browser_type`, `text`: `[WORKSPACE_PATH]/start.sh`。
+    *   **设置参数:** (获取 "Arguments textbox" 的 `ref`)
+        *   操作: `mcp_playwright_browser_type`, `text`: `""`。
+    *   **环境变量: (如果在 inspector 调用中添加它会预填充)**
+        *   操作: 点击 "Environment Variables" 按钮 (获取 `ref`) 查看当前状态。快照。
+环境变量可能在您的配置文件中设置。除非为特定测试运行覆盖这些变量，否则严格来说不需要 UI 输入。
+        *   (如果需要覆盖，例如 `LOG_FILE_PATH=/tmp/custom-mcp-server.log`)：
+            *   点击 "Add Environment Variable" 按钮 (获取 `ref`)。
+            *   在新的键文本框中输入键 (获取 `ref`)。
+            *   在新的值文本框中输入值 (获取 `ref`)。根据需要重复。
+3.  **点击 "Connect":** (从快照中获取 "Connect button" 的 `ref`)
+    *   操作: `mcp_playwright_browser_click`。
+    *   快照: 拍摄快照。
+4.  **验证连接:**
+    *   检查快照: 检查连接状态 (例如，服务 `[MCP_SERVICE_NAME]` 出现)。
+    *   如果连接失败，检查 Inspector UI 中的 "Error output from MCP server" 面板。这显示了 `start.sh` 的 `stderr`。
+    *   关键是，还要检查 `start.sh` 调试日志: `mcp_claude-code_claude_code`, prompt: `"Read /tmp/[MCP_SERVER_NAME]_start_debug.log"`。
+    *   如果 `start.sh` 日志显示它尝试运行 `[MCP_SERVER_NAME]` 但 Inspector 仍然无法连接，则检查 `[MCP_SERVER_NAME]` 自己的日志: `mcp_claude-code_claude_code`, prompt: `"Read [WORKSPACE_PATH]/[LOG_FILE]"`。
+
+**阶段 3: 与 MCP 工具交互** (假设连接成功)
+1.  **列出/选择服务:** 点击 `[MCP_SERVICE_NAME]` 服务名称。快照。
+2.  **选择工具:** 在列表中点击所需的工具。快照。
+3.  **执行工具 (默认参数):** 参数字段应该为空或 `{}`。点击 "Run Tool"。快照。
+
+**阶段 4: 验证工具执行并获取输出**
+1.  **检查 UI 中的结果:** 检查快照中的 JSON 结果，查看 `items` 数组。
+2.  **报告输出:** 清楚地说明 `items` 数组的内容。
+3.  **检查 MCP 服务器日志:**
+    *   操作: `mcp_claude-code_claude_code`, `prompt`: `"Read last 50 lines of [WORKSPACE_PATH]/[LOG_FILE]"` (或配置的路径)。
+    *   查找: 与身份验证、操作和工具执行相关的日志。
+
+**故障排除注意事项 (汇总):**
+- **工作空间路径:** 确保 `[WORKSPACE_PATH]` 被正确替换为绝对路径。
+- **`start.sh`:** 必须可执行。它将自己的调试跟踪记录到 `/tmp/[MCP_SERVER_NAME]_start_debug.log`。在实际 MCP 服务器开始发送 JSON-RPC 之前，它**绝不能**自己输出到 `stdout` 或 `stderr`，因为这会破坏 Inspector 解析。
+- **MCP 服务器日志:** MCP 服务器本身的主要日志位于 `LOG_FILE_PATH` 指定的文件中（默认为项目根目录中的 `./[LOG_FILE]`，在 `[CONFIG_FILE]` 中配置）。使用 `mcp_claude-code_claude_code` 与 `tail -n 100 <path_to_log>` 或 `Read <path_to_log>`。
+- **Inspector UI 错误:** Inspector 中的 "Error output from MCP server" 面板显示启动的 `start.sh` 进程的 `stderr`。如果 `start.sh` 本身大声失败，这很有用。
+- **Playwright Refs:** 始终使用*最新*快照中的 refs 进行交互。

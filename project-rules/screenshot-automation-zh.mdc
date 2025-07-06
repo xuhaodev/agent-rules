@@ -1,0 +1,290 @@
+---
+description: 用于文档和测试的自动截图捕获的可重用 AppleScript 模式
+globs: "**/*.applescript, **/screenshot-*.js"
+alwaysApply: false
+---
+
+# 截图自动化指南
+
+本指南提供了用于应用程序自动截图的可重用 AppleScript 模式，特别适用于文档、测试和视觉验证。
+
+## 核心概念
+
+### 应用程序识别
+
+应用程序可以通过多种方法识别：
+- **Bundle ID**: 对打包应用最可靠（如 `com.company.AppName`）
+- **进程名称**: 可能与应用名称不同（如开发构建的 "Electron"）
+- **绝对路径**: 对开发构建和非标准位置最可靠
+
+### 基本截图脚本
+
+```applescript
+-- 对应用窗口进行无人值守截图的脚本
+-- 将 appPath 设置为应用程序的完整路径
+
+try
+    -- 将此设置为应用程序的完整路径
+    set appPath to "/Applications/YourApp.app"
+    
+    -- 为唯一文件名生成时间戳
+    set currentDate to do shell script "date '+%Y-%m-%d_%H-%M-%S'"
+    set desktopPath to (path to desktop folder as text)
+    set posixDesktopPath to POSIX path of desktopPath
+    set screenshotPath to posixDesktopPath & "app_screenshot_" & currentDate & ".png"
+    
+    -- 从路径提取应用名称
+    set appName to do shell script "basename " & quoted form of appPath & " .app"
+    
+    -- 检查应用是否运行并获取进程名称
+    set isRunning to false
+    set appProcessName to ""
+    
+    -- 首先尝试通过 bundle ID 识别
+    try
+        set appBundleID to do shell script "mdls -name kMDItemCFBundleIdentifier -raw " & quoted form of appPath
+        
+        tell application "System Events"
+            set allProcesses to every process
+            repeat with currentProcess in allProcesses
+                try
+                    if bundle identifier of currentProcess is appBundleID then
+                        set isRunning to true
+                        set appProcessName to name of currentProcess
+                        exit repeat
+                    end if
+                end try
+            end repeat
+        end tell
+    on error
+        -- 回退到应用名称匹配
+        set appProcessName to appName
+        tell application "System Events"
+            if exists process appProcessName then
+                set isRunning to true
+            end if
+        end tell
+    end try
+    
+    -- 如果应用未运行则启动
+    if not isRunning then
+        do shell script "open " & quoted form of appPath
+        delay 2 -- 等待应用启动
+        
+        -- 识别启动的进程
+        tell application "System Events"
+            set newProcesses to every process
+            repeat with currentProcess in newProcesses
+                try
+                    set processName to name of currentProcess
+                    if processName contains appName then
+                        set appProcessName to processName
+                        set isRunning to true
+                        exit repeat
+                    end if
+                end try
+            end repeat
+        end tell
+    end if
+    
+    -- 验证我们有有效的进程
+    if appProcessName is "" or not isRunning then
+        return "无法确定应用路径的进程名称: " & appPath
+    end if
+    
+    -- 截图
+    tell application "System Events"
+        tell process appProcessName
+            -- 置于前台
+            try
+                set frontmost to true
+                delay 0.5 -- 允许时间来到前台
+            on error errMsg
+                log "注意: 无法将 " & appProcessName & " 置于前台: " & errMsg
+            end try
+            
+            if (count of windows) > 0 then
+                set appWindow to window 1
+                set windowPosition to position of appWindow
+                set windowSize to size of appWindow
+                
+                set windowX to item 1 of windowPosition
+                set windowY to item 2 of windowPosition
+                set windowWidth to item 1 of windowSize
+                set windowHeight to item 2 of windowSize
+                
+                -- 验证尺寸
+                if windowWidth is 0 or windowHeight is 0 then
+                    return "窗口尺寸为零"
+                end if
+                
+                delay 0.5 -- 窗口就绪的最终延迟
+                set regionString to windowX & "," & windowY & "," & windowWidth & "," & windowHeight
+                do shell script "screencapture -x -R" & regionString & " " & quoted form of screenshotPath
+                
+                return "截图已保存到: " & screenshotPath
+            else
+                return "未找到 " & appProcessName & " 的窗口"
+            end if
+        end tell
+    end tell
+on error errMsg
+    return "错误: " & errMsg
+end try
+```
+
+## 高级模式
+
+### 多窗口截图
+
+```applescript
+-- 捕获应用程序的所有窗口
+tell application "System Events"
+    tell process "YourAppName"
+        set windowCount to count of windows
+        repeat with i from 1 to windowCount
+            set currentWindow to window i
+            -- 获取窗口边界并捕获
+            -- ... (截图代码在这里)
+        end repeat
+    end tell
+end tell
+```
+
+### 特定窗口状态的截图
+
+```applescript
+-- 截图前准备窗口
+tell application "System Events"
+    tell process appProcessName
+        -- 最大化窗口
+        tell window 1
+            set size to {1920, 1080}
+            set position to {0, 0}
+        end tell
+        
+        -- 等待任何动画
+        delay 1
+        
+        -- 截图
+        -- ... (截图代码在这里)
+    end tell
+end tell
+```
+
+### 与截图工具的集成
+
+对于更高级的截图需求，考虑使用专门的工具：
+
+1. **[Peekaboo](https://github.com/steipete/Peekaboo)** - 自动截图工具
+   ```bash
+   # 安装 Peekaboo
+   brew install steipete/formulae/peekaboo
+   
+   # 在 AppleScript 中使用
+   do shell script "peekaboo capture --app 'YourApp' --output ~/Desktop/screenshot.png"
+   ```
+
+2. **内置 macOS screencapture**
+   ```applescript
+   -- 带阴影的窗口截图
+   do shell script "screencapture -w ~/Desktop/window.png"
+   
+   -- 交互式选择
+   do shell script "screencapture -i ~/Desktop/selection.png"
+   
+   -- 全屏
+   do shell script "screencapture ~/Desktop/fullscreen.png"
+   ```
+
+## 最佳实践
+
+### 1. 错误处理
+始终将截图操作包装在 try 块中：
+```applescript
+try
+    -- 截图操作
+on error errMsg number errNum
+    log "截图失败: " & errMsg & " (错误 " & errNum & ")"
+    -- 处理特定错误
+end try
+```
+
+### 2. 时序考虑
+- 允许应用启动时间（2-3秒）
+- 窗口聚焦后的短暂延迟（0.5秒）
+- 动画密集型应用的更长延迟
+
+### 3. 进程识别策略
+```applescript
+-- 稳健的进程识别
+on findProcess(appPath)
+    -- 首先尝试 bundle ID
+    -- 回退到名称匹配
+    -- 最后尝试路径匹配
+    return processName
+end findProcess
+```
+
+### 4. 截图验证
+```applescript
+-- 验证截图是否已创建
+set fileExists to do shell script "[ -f " & quoted form of screenshotPath & " ] && echo 'true' || echo 'false'"
+if fileExists is "true" then
+    -- 获取文件大小以确保不为空
+    set fileSize to do shell script "stat -f%z " & quoted form of screenshotPath
+    if fileSize as integer > 0 then
+        return "截图成功"
+    end if
+end if
+```
+
+## 常见问题和解决方案
+
+### Electron/开发应用
+开发构建通常以通用名称运行：
+```applescript
+-- 对于开发中的 Electron 应用
+set appProcessName to "Electron"
+-- 可能需要通过窗口标题识别
+tell application "System Events"
+    tell process "Electron"
+        set targetWindow to (first window whose title contains "YourAppName")
+    end tell
+end tell
+```
+
+### 权限问题
+确保终端/脚本编辑器具有屏幕录制权限：
+- 系统偏好设置 › 安全性与隐私 › 隐私 › 屏幕录制
+
+### Retina 显示器处理
+Retina 显示器上的截图以原生分辨率捕获：
+```applescript
+-- Retina 显示器的缩放感知
+set screenScale to do shell script "system_profiler SPDisplaysDataType | grep 'UI Looks like' | head -1 | grep -o '[0-9]*x[0-9]*' | cut -d'x' -f1"
+-- 如果需要，调整坐标
+```
+
+## 集成示例
+
+### 与 CI/CD 系统
+```bash
+#!/bin/bash
+# ci-screenshot.sh
+osascript screenshot-script.applescript
+# 上传到工件存储
+aws s3 cp ~/Desktop/app_screenshot_*.png s3://bucket/screenshots/
+```
+
+### 与测试框架
+```applescript
+-- 为测试验证返回截图路径
+on takeTestScreenshot(testName)
+    set screenshotPath to "/tmp/test_" & testName & ".png"
+    -- 截图
+    return screenshotPath
+end takeTestScreenshot
+```
+
+本指南提供了可靠、自动化截图捕获的模式，可以集成到各种工作流程和工具中。
