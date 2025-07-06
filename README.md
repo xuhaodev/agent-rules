@@ -1,3 +1,5 @@
+[![English](https://img.shields.io/badge/Language-English-blue.svg)](README.md) [![中文](https://img.shields.io/badge/语言-中文-red.svg)](README-zh.md)
+
 # Agent Rules
 
 A collection of reusable rules and knowledge documents for AI coding assistants like Claude Code and Cursor.
@@ -65,6 +67,12 @@ Global Claude Code configuration and automation scripts (place in `~/.claude/CLA
 - **[mcp-sync-rule.md](./global-rules/mcp-sync-rule.md)** - Documentation for MCP sync functionality
 
 ## Usage
+
+### For VSCode GitHub Copilot Uses:
+1. Creates/updates individual .instructions.md files within ./.github/instructions/ (project-local).
+2. Uses YAML frontmatter with applyTo field for file targeting.
+3. Rule name and description are included in the markdown content, not frontmatter.
+4. Note: Due to VSCode's limitations with multiple globs in the applyTo field, all rules use applyTo: "**" for universal application and better reliability.
 
 ### For Cursor Users
 1. Copy any `.mdc` file from `project-rules/` to your project's `.cursor/rules/` directory
